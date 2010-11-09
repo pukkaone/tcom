@@ -1,4 +1,4 @@
-// $Id: TclObject.cpp 18 2005-05-03 00:40:40Z cthuang $
+// $Id$
 #include "TclObject.h"
 #include <vector>
 #ifdef WIN32

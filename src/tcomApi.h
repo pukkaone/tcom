@@ -1,4 +1,4 @@
-// $Id: tcomApi.h 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #ifndef TCOMAPI_H
 #define TCOMAPI_H
 

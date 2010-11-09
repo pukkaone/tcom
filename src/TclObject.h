@@ -1,4 +1,4 @@
-// $Id: TclObject.h 16 2005-04-19 14:47:52Z cthuang $
+// $Id$
 #ifndef TCLOBJECT_H
 #define TCLOBJECT_H
 

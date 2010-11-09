@@ -1,4 +1,4 @@
-# $Id: excel.tcl 5 2005-02-16 14:57:24Z cthuang $
+# $Id$
 #
 # This example controls Excel.  It performs the following steps.
 #       - Start Excel application.

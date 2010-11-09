@@ -1,4 +1,4 @@
-// $Id: TypeInfo.cpp 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #pragma warning(disable: 4786)
 #include <sstream>
 #include <map>

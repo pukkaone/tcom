@@ -1,4 +1,4 @@
-// $Id: ComObject.h 13 2005-04-18 12:24:14Z cthuang $
+// $Id$
 #ifndef COMOBJECT_H
 #define COMOBJECT_H
 

@@ -1,4 +1,4 @@
-// $Id: InterfaceAdapterVtbl.cpp 16 2005-04-19 14:47:52Z cthuang $
+// $Id$
 #ifdef TCOM_VTBL_SERVER
 
 #pragma warning(disable: 4786)

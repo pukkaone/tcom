@@ -1,4 +1,4 @@
-# $Id: all.tcl 5 2005-02-16 14:57:24Z cthuang $
+# $Id$
 #
 # This file contains a top-level script to run all of the tests.
 

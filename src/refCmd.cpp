@@ -1,4 +1,4 @@
-// $Id: refCmd.cpp 16 2005-04-19 14:47:52Z cthuang $
+// $Id$
 #pragma warning(disable: 4786)
 #include "Extension.h"
 #include <sstream>

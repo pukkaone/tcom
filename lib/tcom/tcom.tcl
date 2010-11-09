@@ -1,4 +1,4 @@
-# $Id: tcom.tcl 5 2005-02-16 14:57:24Z cthuang $
+# $Id$
 
 namespace eval ::tcom {
     # Tear down all event connections to the object.

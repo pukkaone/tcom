@@ -1,4 +1,4 @@
-// $Id: TclInterp.h 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #ifndef TCLINTERP_H
 #define TCLINTERP_H
 

@@ -1,4 +1,4 @@
-// $Id: ThreadLocalStorage.h 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #ifndef THREADLOCALSTORAGE_H
 #define THREADLOCALSTORAGE_H
 

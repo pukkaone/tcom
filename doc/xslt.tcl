@@ -1,4 +1,4 @@
-# $Id: xslt.tcl 7 2005-02-24 05:18:47Z cthuang $
+# $Id$
 #
 # Run an XML document through an XSLT processor.
 

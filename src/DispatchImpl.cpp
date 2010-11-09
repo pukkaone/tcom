@@ -1,4 +1,4 @@
-// $Id: DispatchImpl.cpp 14 2005-04-18 14:14:12Z cthuang $
+// $Id$
 #pragma warning(disable: 4786)
 #include "DispatchImpl.h"
 #include <stdexcept>

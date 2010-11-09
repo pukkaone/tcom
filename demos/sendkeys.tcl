@@ -1,4 +1,4 @@
-# $Id: sendkeys.tcl 5 2005-02-16 14:57:24Z cthuang $
+# $Id$
 #
 # This example demonstrates how to send keys to Windows applications.
 # It requires Windows Script Host 2.0 installed on the system.

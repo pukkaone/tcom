@@ -1,4 +1,4 @@
-// $Id: DispatchImpl.h 14 2005-04-18 14:14:12Z cthuang $
+// $Id$
 #ifndef DISPATCHIMPL_H
 #define DISPATCHIMPL_H
 

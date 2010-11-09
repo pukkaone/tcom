@@ -1,4 +1,4 @@
-// $Id: TypeLib.cpp 9 2005-04-07 14:14:37Z cthuang $
+// $Id$
 #pragma warning(disable: 4786)
 #include <sstream>
 #include "RegistryKey.h"

@@ -1,4 +1,4 @@
-// $Id: Reference.h 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #ifndef REFERENCE_H
 #define REFERENCE_H
 

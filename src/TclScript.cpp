@@ -1,4 +1,4 @@
-// $Id: TclScript.cpp 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #include "ActiveScriptError.h"
 #include "Reference.h"
 #include "TypeInfo.h"

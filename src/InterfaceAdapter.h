@@ -1,4 +1,4 @@
-// $Id: InterfaceAdapter.h 16 2005-04-19 14:47:52Z cthuang $
+// $Id$
 #ifndef INTERFACEADAPTER_H
 #define INTERFACEADAPTER_H
 

@@ -1,4 +1,4 @@
-// $Id: Uuid.h 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #ifndef UUID_H
 #define UUID_H
 

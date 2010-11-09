@@ -1,4 +1,4 @@
-// $Id: bindCmd.cpp 13 2005-04-18 12:24:14Z cthuang $
+// $Id$
 #pragma warning(disable: 4786)
 #include "Extension.h"
 #include "Reference.h"

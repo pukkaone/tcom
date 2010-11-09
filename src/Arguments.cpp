@@ -1,4 +1,4 @@
-// $Id: Arguments.cpp 20 2005-05-04 16:53:05Z cthuang $
+// $Id$
 #include "Arguments.h"
 #include "Extension.h"
 #include "TclObject.h"

@@ -1,4 +1,4 @@
-// $Id: ComModule.h 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #ifndef COMMODULE_H
 #define COMMODULE_H
 

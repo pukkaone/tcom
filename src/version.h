@@ -1,4 +1,4 @@
-// $Id: version.h 5 2005-02-16 14:57:24Z cthuang $
+// $Id$
 #ifndef VERSION_H
 #define VERSION_H
 
