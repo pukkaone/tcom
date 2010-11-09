@@ -1,4 +1,4 @@
-// $Id: ComObjectFactory.cpp,v 1.17 2002/05/31 04:03:06 cthuang Exp $
+// $Id: ComObjectFactory.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include "ComModule.h"
 #include "ComObject.h"

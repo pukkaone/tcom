@@ -1,4 +1,4 @@
-// $Id: nullCmd.cpp,v 1.10 2003/03/07 00:17:30 cthuang Exp $
+// $Id: nullCmd.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "Extension.h"
 #include <string.h>
 

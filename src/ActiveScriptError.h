@@ -1,4 +1,4 @@
-// $Id: ActiveScriptError.h,v 1.2 2002/04/12 02:55:27 cthuang Exp $
+// $Id: ActiveScriptError.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef ACTIVESCRIPTERROR_H
 #define ACTIVESCRIPTERROR_H
 

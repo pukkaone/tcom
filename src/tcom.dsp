@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I "\tcl\include" /D "NDEBUG" /D "_WIN32_DCOM" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "TCL_THREADS" /D "USE_TCL_STUBS" /D "USE_NON_CONST" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I "\tcl\include" /D "NDEBUG" /D "_WIN32_DCOM" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "TCOM_VTBL_SERVER" /D "TCL_THREADS" /D "USE_TCL_STUBS" /D "USE_NON_CONST" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "\tcl\include" /D "_DEBUG" /D "_WIN32_DCOM" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "TCL_THREADS" /D "USE_TCL_STUBS" /D "USE_NON_CONST" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "\tcl\include" /D "_DEBUG" /D "_WIN32_DCOM" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "TCOM_VTBL_SERVER" /D "TCL_THREADS" /D "USE_TCL_STUBS" /D "USE_NON_CONST" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -98,7 +98,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "e:\tcl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "_WIN32_DCOM" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /Zi /O2 /I "\tcl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "TCL_THREADS" /D "USE_TCL_STUBS" /D "USE_NON_CONST" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /O2 /I "\tcl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "TCOM_VTBL_SERVER" /D "TCL_THREADS" /D "USE_TCL_STUBS" /D "USE_NON_CONST" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -125,7 +125,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "c:\tcl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "_WIN32_DCOM" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "\tcl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "TCL_THREADS" /D "USE_TCL_STUBS" /D "USE_NON_CONST" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "\tcl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "TCOM_EXPORTS" /D "TCOM_VTBL_SERVER" /D "TCL_THREADS" /D "USE_TCL_STUBS" /D "USE_NON_CONST" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -174,6 +174,14 @@ SOURCE=.\configureCmd.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\DispatchAdapter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\DispatchImpl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Extension.cpp
 # End Source File
 # Begin Source File
@@ -207,6 +215,10 @@ SOURCE=.\main.cpp
 # Begin Source File
 
 SOURCE=.\naCmd.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\NativeValue.cpp
 # End Source File
 # Begin Source File
 
@@ -286,6 +298,14 @@ SOURCE=.\ComObjectFactory.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\DispatchAdapter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DispatchImpl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Extension.h
 # End Source File
 # Begin Source File
@@ -303,6 +323,10 @@ SOURCE=.\InterfaceAdapter.h
 # Begin Source File
 
 SOURCE=.\mutex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\NativeValue.h
 # End Source File
 # Begin Source File
 

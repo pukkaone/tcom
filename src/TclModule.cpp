@@ -1,4 +1,4 @@
-// $Id: TclModule.cpp,v 1.5 2002/04/13 03:53:56 cthuang Exp $
+// $Id: TclModule.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include "TclObject.h"
 #include "TclModule.h"

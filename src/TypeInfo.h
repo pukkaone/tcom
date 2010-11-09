@@ -1,4 +1,4 @@
-// $Id: TypeInfo.h,v 1.41 2002/04/20 06:11:32 cthuang Exp $
+// $Id: TypeInfo.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef TYPEINFO_H
 #define TYPEINFO_H
 

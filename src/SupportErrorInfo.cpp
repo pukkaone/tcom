@@ -1,4 +1,4 @@
-// $Id: SupportErrorInfo.cpp,v 1.3 2001/07/17 02:24:08 cthuang Exp $
+// $Id: SupportErrorInfo.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "ComObject.h"
 #include "SupportErrorInfo.h"
 

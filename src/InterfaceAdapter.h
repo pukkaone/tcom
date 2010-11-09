@@ -1,11 +1,11 @@
-// $Id: InterfaceAdapter.h,v 1.3 2002/02/27 01:58:45 cthuang Exp $
+// $Id: InterfaceAdapter.h 16 2005-04-19 14:47:52Z cthuang $
 #ifndef INTERFACEADAPTER_H
 #define INTERFACEADAPTER_H
 
 #include <map>
 #include <set>
 #include "tcomApi.h"
-#include "TypeInfo.h"
+#include "DispatchImpl.h"
 
 class TCOM_API ComObject;
 
@@ -22,31 +22,21 @@ class TCOM_API InterfaceAdapter
     const void *m_pVtbl;
 
     // delegate operations to this object
-    ComObject &m_object;
-
-    // description of the interface to implement
-    const Interface &m_interface;
+    DispatchImpl m_dispatchImpl;
 
     // virtual function index to method description map
     typedef std::map<short, const Method *> VtblIndexToMethodMap;
     VtblIndexToMethodMap m_vtblIndexToMethodMap;
 
-    // dispatch member ID to method description map
-    typedef std::map<DISPID, const Method *> DispIdToMethodMap;
-    DispIdToMethodMap m_dispIdToMethodMap;
+    // virtual function table for custom (IUnknown derived) interfaces
+    static const void *customVtbl[];
 
-    // dispatch member ID's which are actually properties
-    typedef std::set<DISPID> DispIdSet;
-    DispIdSet m_propertyDispIds;
+    // virtual function table for dual (IDispatch derived) interfaces
+    static const void *dualVtbl[];
 
-    // virtual function table for IUnknown derived interfaces
-    static const void *unknownVtbl[];
-
-    // virtual function table for IDispatch derived interfaces
-    static const void *dispatchVtbl[];
-
-    InterfaceAdapter(const InterfaceAdapter &); // not implemented
-    void operator=(const InterfaceAdapter &);   // not implemented
+     // not implemented
+    InterfaceAdapter(const InterfaceAdapter &);
+    void operator=(const InterfaceAdapter &);
 
 public:
     InterfaceAdapter(
@@ -56,17 +46,10 @@ public:
 
     // Get delegate object.
     ComObject &object () const
-    { return m_object; }
+    { return m_dispatchImpl.object(); }
 
     // Get COM method description.
     const Method *findComMethod(int funcIndex);
-
-    // Get dispatch method description.
-    const Method *findDispatchMethod(DISPID dispid);
-
-    // Return true if the dispatch member ID identifies a property.
-    bool isProperty (DISPID dispid) const
-    { return m_propertyDispIds.count(dispid) != 0; }
 
     // IUnknown implementation
     static STDMETHODIMP QueryInterface(

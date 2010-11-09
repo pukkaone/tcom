@@ -1,4 +1,4 @@
-// $Id: Singleton.h,v 1.9 2002/04/13 03:53:56 cthuang Exp $
+// $Id: Singleton.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef SINGLETON_H
 #define SINGLETON_H
 

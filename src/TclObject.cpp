@@ -1,4 +1,4 @@
-// $Id: TclObject.cpp,v 1.35 2003/05/12 23:30:43 cthuang Exp $
+// $Id: TclObject.cpp 18 2005-05-03 00:40:40Z cthuang $
 #include "TclObject.h"
 #include <vector>
 #ifdef WIN32
@@ -158,7 +158,7 @@ TclObject::lappend (Tcl_Obj *pElement)
 static Tcl_Obj *
 convertFromSafeArray (
     SAFEARRAY *psa,
-    VARTYPE vt,
+    VARTYPE elementType,
     unsigned dim,
     long *pIndices,
     const Type &type,
@@ -185,14 +185,14 @@ convertFromSafeArray (
         pResult = Tcl_NewListObj(0, 0);
         for (long i = lowerBound; i <= upperBound; ++i) {
             pIndices[dim - 1] = i;
-            Tcl_Obj *pElement =
-                convertFromSafeArray(psa, vt, dim + 1, pIndices, type, interp);
+            Tcl_Obj *pElement = convertFromSafeArray(
+                psa, elementType, dim + 1, pIndices, type, interp);
             Tcl_ListObjAppendElement(interp, pResult, pElement);
         }
         return pResult;
     }
 
-    if (vt == VT_UI1 && SafeArrayGetDim(psa) == 1) {
+    if (elementType == VT_UI1 && SafeArrayGetDim(psa) == 1) {
         unsigned char *pData;
         hr = SafeArrayAccessData(psa, reinterpret_cast<void **>(&pData));
         if (FAILED(hr)) {
@@ -218,14 +218,14 @@ convertFromSafeArray (
         // Create list of Tcl values.
         pResult = Tcl_NewListObj(0, 0);
         for (long i = lowerBound; i <= upperBound; ++i) {
-            _variant_t elementVar;
+            NativeValue elementVar;
 
             pIndices[dim - 1] = i;
-            if (vt == VT_VARIANT) {
+            if (elementType == VT_VARIANT) {
                 hr = SafeArrayGetElement(psa, pIndices, &elementVar);
             } else {
                 // I hope the element can be contained in a VARIANT.
-                V_VT(&elementVar) = vt;
+                V_VT(&elementVar) = elementType;
                 hr = SafeArrayGetElement(psa, pIndices, &elementVar.punkVal);
             }
             if (FAILED(hr)) {
@@ -284,8 +284,8 @@ fillSafeArray (
     } else {
         for (int i = 0; i < numElements; ++i) {
             TclObject element(pElements[i]); 
-            _variant_t elementVar;
-            element.toVariant(&elementVar, Type::variant(), interp, addRef);
+            NativeValue elementVar;
+            element.toNativeValue(&elementVar, Type::variant(), interp, addRef);
 
             pIndices[dim1] = i;
             hr = SafeArrayPutElement(psa, pIndices, &elementVar);
@@ -296,15 +296,28 @@ fillSafeArray (
     }
 }
 
+static Tcl_Obj *
+convertFromUnknown (IUnknown *pUnknown, REFIID iid, Tcl_Interp *interp)
+{
+    if (pUnknown == 0) {
+        return Tcl_NewObj();
+    }
+
+    const Interface *pInterface = InterfaceManager::instance().find(iid);
+    return Extension::referenceHandles.newObj(
+        interp,
+        Reference::newReference(pUnknown, pInterface));
+}
+
 TclObject::TclObject (VARIANT *pSrc, const Type &type, Tcl_Interp *interp)
 {
-    if (V_VT(pSrc) & VT_ARRAY) {
-        SAFEARRAY *psa = V_ARRAY(pSrc);
-        VARTYPE vt = V_VT(pSrc) & VT_TYPEMASK;
+    if (V_ISARRAY(pSrc)) {
+        SAFEARRAY *psa = V_ISBYREF(pSrc) ? *V_ARRAYREF(pSrc) : V_ARRAY(pSrc);
+        VARTYPE elementType = V_VT(pSrc) & VT_TYPEMASK;
         unsigned numDimensions = SafeArrayGetDim(psa);
         std::vector<long> indices(numDimensions);
         m_pObj = convertFromSafeArray(
-            psa, vt, 1, &indices[0], type, interp);
+            psa, elementType, 1, &indices[0], type, interp);
 
     } else if (vtMissing == pSrc) {
         m_pObj = Extension::newNaObj();
@@ -313,6 +326,10 @@ TclObject::TclObject (VARIANT *pSrc, const Type &type, Tcl_Interp *interp)
         switch (V_VT(pSrc)) {
         case VT_BOOL:
             m_pObj = Tcl_NewBooleanObj(V_BOOL(pSrc));
+            break;
+
+        case VT_ERROR:
+            m_pObj = Tcl_NewLongObj(V_ERROR(pSrc));
             break;
 
         case VT_I1:
@@ -332,6 +349,13 @@ TclObject::TclObject (VARIANT *pSrc, const Type &type, Tcl_Interp *interp)
             m_pObj = Tcl_NewLongObj(V_I4(pSrc));
             break;
 
+#ifdef V_I8
+        case VT_I8:
+        case VT_UI8:
+            m_pObj = Tcl_NewWideIntObj(V_I8(pSrc));
+            break;
+#endif
+
         case VT_R4:
             m_pObj = Tcl_NewDoubleObj(V_R4(pSrc));
             break;
@@ -342,27 +366,25 @@ TclObject::TclObject (VARIANT *pSrc, const Type &type, Tcl_Interp *interp)
             break;
 
         case VT_DISPATCH:
-            if (V_DISPATCH(pSrc) == 0) {
-                m_pObj = Tcl_NewObj();
-            } else {
-                const Interface *pInterface =
-                    InterfaceManager::instance().find(type.iid());
-                m_pObj = Extension::referenceHandles.newObj(
-                    interp,
-                    Reference::newReference(V_DISPATCH(pSrc), pInterface));
-            }
+            m_pObj = convertFromUnknown(V_DISPATCH(pSrc), type.iid(), interp);
+            break;
+
+        case VT_DISPATCH | VT_BYREF:
+            m_pObj = convertFromUnknown(
+                (V_DISPATCHREF(pSrc) != 0) ? *V_DISPATCHREF(pSrc) : 0,
+                type.iid(),
+                interp);
             break;
 
         case VT_UNKNOWN:
-            if (V_UNKNOWN(pSrc) == 0) {
-                m_pObj = Tcl_NewObj();
-            } else {
-                const Interface *pInterface =
-                    InterfaceManager::instance().find(type.iid());
-                m_pObj = Extension::referenceHandles.newObj(
-                    interp,
-                    Reference::newReference(V_UNKNOWN(pSrc), pInterface));
-            }
+            m_pObj = convertFromUnknown(V_UNKNOWN(pSrc), type.iid(), interp);
+            break;
+
+        case VT_UNKNOWN | VT_BYREF:
+            m_pObj = convertFromUnknown(
+                (V_UNKNOWNREF(pSrc) != 0) ? *V_UNKNOWNREF(pSrc) : 0,
+                type.iid(),
+                interp);
             break;
 
         case VT_NULL:
@@ -392,6 +414,10 @@ TclObject::TclObject (VARIANT *pSrc, const Type &type, Tcl_Interp *interp)
                 m_pObj = Tcl_NewStringObj(
                     const_cast<char *>(uuid.toString().c_str()), -1);
             } else {
+                if (V_VT(pSrc) == (VT_VARIANT | VT_BYREF)) {
+                    pSrc = V_VARIANTREF(pSrc);
+                }
+
                 _bstr_t str(pSrc);
 #if TCL_MINOR_VERSION >= 2
                 // Uses Unicode function introduced in Tcl 8.2.
@@ -404,6 +430,33 @@ TclObject::TclObject (VARIANT *pSrc, const Type &type, Tcl_Interp *interp)
             }
         }
     }
+
+    Tcl_IncrRefCount(m_pObj);
+}
+
+TclObject::TclObject (const _bstr_t &src)
+{
+    if (src.length() > 0) {
+#if TCL_MINOR_VERSION >= 2
+        // Uses Unicode functions introduced in Tcl 8.2.
+        m_pObj = Tcl_NewUnicodeObj(src, -1);
+#else
+        m_pObj = Tcl_NewStringObj(src, -1);
+#endif
+    } else {
+        m_pObj = Tcl_NewObj();
+    }
+
+    Tcl_IncrRefCount(m_pObj);
+}
+
+TclObject::TclObject (
+    SAFEARRAY *psa, const Type &type, Tcl_Interp *interp)
+{
+    unsigned numDimensions = SafeArrayGetDim(psa);
+    std::vector<long> indices(numDimensions);
+    m_pObj = convertFromSafeArray(
+        psa, type.elementType().vartype(), 1, &indices[0], type, interp);
 
     Tcl_IncrRefCount(m_pObj);
 }
@@ -453,6 +506,83 @@ newByteSafeArray (Tcl_Obj *pObj)
 }
 #endif
 
+SAFEARRAY *
+TclObject::getSafeArray (const Type &elementType, Tcl_Interp *interp) const
+{
+    SAFEARRAY *psa;
+
+    if (elementType.vartype() == VT_UI1) {
+        psa = newByteSafeArray(m_pObj);
+    } else {
+        // Convert Tcl list to SAFEARRAY.
+        int numElements;
+        Tcl_Obj **pElements;
+        if (Tcl_ListObjGetElements(interp, m_pObj, &numElements, &pElements)
+          != TCL_OK) {
+            _com_issue_error(E_INVALIDARG);
+        }
+
+        psa = SafeArrayCreateVector(elementType.vartype(), 0, numElements);
+        if (psa == 0) {
+            _com_issue_error(E_OUTOFMEMORY);
+        }
+
+        void *pData;
+        HRESULT hr;
+        hr = SafeArrayAccessData(psa, &pData);
+        if (FAILED(hr)) {
+            _com_issue_error(hr);
+        }
+
+        for (int i = 0; i < numElements; ++i) {
+            TclObject value(pElements[i]);
+
+            switch (elementType.vartype()) {
+            case VT_BOOL:
+                static_cast<VARIANT_BOOL *>(pData)[i] =
+                    value.getBool() ? VARIANT_TRUE : VARIANT_FALSE;
+                break;
+
+            case VT_I2:
+            case VT_UI2:
+                static_cast<short *>(pData)[i] = value.getLong();
+                break;
+
+            case VT_R4:
+                static_cast<float *>(pData)[i] =
+                    static_cast<float>(value.getDouble());
+                break;
+
+            case VT_R8:
+                static_cast<double *>(pData)[i] = value.getDouble();
+                break;
+
+            case VT_BSTR:
+                static_cast<BSTR *>(pData)[i] = value.getBSTR();
+                break;
+
+            case VT_VARIANT:
+                {
+                    VARIANT *pDest = static_cast<VARIANT *>(pData) + i;
+                    VariantInit(pDest);
+                    value.toVariant(pDest, elementType, interp);
+                }
+                break;
+
+            default:
+                static_cast<int *>(pData)[i] = value.getLong();
+            }
+        }
+
+        hr = SafeArrayUnaccessData(psa);
+        if (FAILED(hr)) {
+            _com_issue_error(hr);
+        }
+    }
+
+    return psa;
+}
+
 void
 TclObject::toVariant (VARIANT *pDest,
                       const Type &type,
@@ -493,75 +623,10 @@ TclObject::toVariant (VARIANT *pDest,
         V_UNKNOWN(pDest) = pUnknown;
 
     } else if (vt == VT_SAFEARRAY) {
-        SAFEARRAY *psa;
+
         const Type &elementType = type.elementType();
-
-        if (elementType.vartype() == VT_UI1) {
-            psa = newByteSafeArray(m_pObj);
-        } else {
-            // Convert Tcl list to SAFEARRAY.
-            int numElements;
-            Tcl_Obj **pElements;
-            if (Tcl_ListObjGetElements(interp, m_pObj, &numElements, &pElements)
-              != TCL_OK) {
-                _com_issue_error(E_INVALIDARG);
-            }
-
-            psa = SafeArrayCreateVector(elementType.vartype(), 0, numElements);
-            if (psa == 0) {
-                _com_issue_error(E_OUTOFMEMORY);
-            }
-
-            void *pData;
-            HRESULT hr;
-            hr = SafeArrayAccessData(psa, &pData);
-            if (FAILED(hr)) {
-                _com_issue_error(hr);
-            }
-
-            for (int i = 0; i < numElements; ++i) {
-                TclObject value(pElements[i]);
-
-                switch (elementType.vartype()) {
-                case VT_BOOL:
-                    static_cast<VARIANT_BOOL *>(pData)[i] =
-                        value.getBool() ? VARIANT_TRUE : VARIANT_FALSE;
-                    break;
-
-                case VT_R4:
-                    static_cast<float *>(pData)[i] =
-                        static_cast<float>(value.getDouble());
-                    break;
-
-                case VT_R8:
-                    static_cast<double *>(pData)[i] = value.getDouble();
-                    break;
-
-                case VT_BSTR:
-                    static_cast<BSTR *>(pData)[i] = value.getBSTR();
-                    break;
-
-                case VT_VARIANT:
-                    {
-                        VARIANT *pDest = static_cast<VARIANT *>(pData) + i;
-                        VariantInit(pDest);
-                        value.toVariant(pDest, elementType, interp);
-                    }
-                    break;
-
-                default:
-                    static_cast<int *>(pData)[i] = value.getLong();
-                }
-            }
-
-            hr = SafeArrayUnaccessData(psa);
-            if (FAILED(hr)) {
-                _com_issue_error(hr);
-            }
-        }
-
         V_VT(pDest) = VT_ARRAY | elementType.vartype();
-        V_ARRAY(pDest) = psa;
+        V_ARRAY(pDest) = getSafeArray(elementType, interp);
 
     } else if (m_pObj->typePtr == TclTypes::listType()) {
         // Convert Tcl list to array of VARIANT.
@@ -676,6 +741,28 @@ TclObject::toVariant (VARIANT *pDest,
             VariantChangeType(pDest, pDest, 0, vt);
         }
     }
+}
+
+
+void
+TclObject::toNativeValue (NativeValue *pDest,
+                          const Type &type,
+                          Tcl_Interp *interp,
+                          bool addRef)
+{
+#ifdef V_I8
+    VARTYPE vt = type.vartype();
+    if (vt == VT_I8 || vt == VT_UI8) {
+        pDest->fixInvalidVariantType();
+        VariantClear(pDest);
+        V_VT(pDest) = vt;
+        Tcl_GetWideIntFromObj(interp, m_pObj, &V_I8(pDest));
+        return;
+    }
+#endif
+
+    pDest->fixInvalidVariantType();
+    toVariant(pDest, type, interp, addRef);
 }
 
 #endif

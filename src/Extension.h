@@ -1,4 +1,4 @@
-// $Id: Extension.h,v 1.5 2003/04/02 22:46:51 cthuang Exp $
+// $Id: Extension.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef EXTENSION_H
 #define EXTENSION_H
 

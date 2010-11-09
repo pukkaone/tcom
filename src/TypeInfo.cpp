@@ -1,4 +1,4 @@
-// $Id: TypeInfo.cpp,v 1.58 2002/04/20 06:11:32 cthuang Exp $
+// $Id: TypeInfo.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include <sstream>
 #include <map>
@@ -35,7 +35,7 @@ static VarTypeStringAssoc varTypeStringAssocs[] = {
     { VT_DATE, "DATE" },
     { VT_BSTR, "BSTR" },
     { VT_DISPATCH, "DISPATCH" },
-    { VT_ERROR, "ERROR" },
+    { VT_ERROR, "SCODE" },
     { VT_BOOL, "BOOL" },
     { VT_VARIANT, "VARIANT" },
     { VT_UNKNOWN, "UNKNOWN" },

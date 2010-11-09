@@ -1,43 +1,28 @@
-// $Id: InterfaceAdapter.cpp,v 1.3 2002/02/27 01:58:45 cthuang Exp $
+// $Id: InterfaceAdapter.cpp 16 2005-04-19 14:47:52Z cthuang $
+#ifdef TCOM_VTBL_SERVER
+
 #pragma warning(disable: 4786)
-#include "ComObject.h"
 #include "InterfaceAdapter.h"
+#include "ComObject.h"
 
 InterfaceAdapter::InterfaceAdapter (
     ComObject &object,
     const Interface &interfaceDesc,
     bool forceDispatch):
-        m_object(object),
-        m_interface(interfaceDesc)
+        m_dispatchImpl(object, interfaceDesc)
 {
     // Initialize virtual function index to method description map.
-    const Interface::Methods &methods = m_interface.methods();
+    const Interface::Methods &methods = interfaceDesc.methods();
     for (Interface::Methods::const_iterator p = methods.begin();
      p != methods.end(); ++p) {
         m_vtblIndexToMethodMap.insert(VtblIndexToMethodMap::value_type(
             p->vtblIndex(), &(*p)));
     }
 
-    if (m_interface.dispatchable() || forceDispatch) {
-        m_pVtbl = dispatchVtbl;
-
-        // Initialize dispatch member ID to method description map.
-        const Interface::Methods &methods = m_interface.methods();
-        for (Interface::Methods::const_iterator pMethod = methods.begin();
-         pMethod != methods.end(); ++pMethod) {
-            m_dispIdToMethodMap.insert(DispIdToMethodMap::value_type(
-                pMethod->memberid(), &(*pMethod)));
-        }
-
-        // Initialize set of property dispatch member ID's.
-        const Interface::Properties &properties = m_interface.properties();
-        for (Interface::Properties::const_iterator pProp = properties.begin();
-         pProp != properties.end(); ++pProp) {
-            m_propertyDispIds.insert(pProp->memberid());
-        }
-
+    if (interfaceDesc.dispatchable() || forceDispatch) {
+        m_pVtbl = dualVtbl;
     } else {
-        m_pVtbl = unknownVtbl;
+        m_pVtbl = customVtbl;
     }
 }
 
@@ -52,35 +37,25 @@ InterfaceAdapter::findComMethod (int funcIndex)
     return p->second;
 }
 
-const Method *
-InterfaceAdapter::findDispatchMethod (DISPID dispid)
-{
-    DispIdToMethodMap::const_iterator p = m_dispIdToMethodMap.find(dispid);
-    if (p == m_dispIdToMethodMap.end()) {
-        return 0;
-    }
-    return p->second;
-}
-
 // Implement IUnknown methods
 
 STDMETHODIMP
 InterfaceAdapter::QueryInterface (
     InterfaceAdapter *pThis, REFIID iid, void **ppvObj)
 {
-   return pThis->m_object.queryInterface(iid, ppvObj);
+   return pThis->m_dispatchImpl.object().queryInterface(iid, ppvObj);
 }
 
 STDMETHODIMP_(ULONG)
 InterfaceAdapter::AddRef (InterfaceAdapter *pThis)
 {
-    return pThis->m_object.addRef();
+    return pThis->m_dispatchImpl.object().addRef();
 }
 
 STDMETHODIMP_(ULONG)
 InterfaceAdapter::Release (InterfaceAdapter *pThis)
 {
-    return pThis->m_object.release();
+    return pThis->m_dispatchImpl.object().release();
 }
 
 // Implement IDispatch methods
@@ -101,7 +76,7 @@ InterfaceAdapter::GetTypeInfo (
         return DISP_E_BADINDEX;
     }
 
-    ITypeInfo *pTypeInfo = pThis->m_interface.typeInfo();
+    ITypeInfo *pTypeInfo = pThis->m_dispatchImpl.typeInfo();
     pTypeInfo->AddRef();
     *ppTypeInfo = pTypeInfo;
     return S_OK;
@@ -116,7 +91,7 @@ InterfaceAdapter::GetIDsOfNames (
     LCID,
     DISPID *rgDispId)
 {
-    ITypeInfo *pTypeInfo = pThis->m_interface.typeInfo();
+    ITypeInfo *pTypeInfo = pThis->m_dispatchImpl.typeInfo();
     return pTypeInfo->GetIDsOfNames(rgszNames, cNames, rgDispId);
 }
 
@@ -132,8 +107,7 @@ InterfaceAdapter::Invoke (
     EXCEPINFO *pExcepInfo,
     UINT *pArgErr)
 {
-    return pThis->m_object.invoke(
-        pThis,
+    return pThis->m_dispatchImpl.invoke(
         dispid,
         iid,
         lcid,
@@ -143,3 +117,5 @@ InterfaceAdapter::Invoke (
         pExcepInfo,
         pArgErr);
 }
+
+#endif

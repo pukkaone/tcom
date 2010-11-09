@@ -1,4 +1,4 @@
-// $Id: HandleSupport.h,v 1.29 2003/07/17 22:33:31 cthuang Exp $
+// $Id: HandleSupport.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef HANDLESUPPORT_H
 #define HANDLESUPPORT_H
 

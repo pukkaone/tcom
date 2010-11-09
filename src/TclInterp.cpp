@@ -1,4 +1,4 @@
-// $Id: TclInterp.cpp,v 1.12 2002/04/13 03:53:56 cthuang Exp $
+// $Id: TclInterp.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include <sstream>
 #include "RegistryKey.h"
 #include "TclObject.h"

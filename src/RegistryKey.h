@@ -1,4 +1,4 @@
-// $Id: RegistryKey.h,v 1.5 2001/11/28 16:10:57 cthuang Exp $
+// $Id: RegistryKey.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef REGISTRYKEY_H
 #define REGISTRYKEY_H
 

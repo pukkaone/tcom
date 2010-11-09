@@ -1,4 +1,4 @@
-// $Id: exemain.cpp,v 1.12 2002/07/14 18:42:57 cthuang Exp $
+// $Id: exemain.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include "TclModule.h"
 #include "tclRunTime.h"

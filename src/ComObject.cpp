@@ -1,9 +1,12 @@
-// $Id: ComObject.cpp,v 1.41 2003/04/04 23:55:04 cthuang Exp $
+// $Id: ComObject.cpp 13 2005-04-18 12:24:14Z cthuang $
 #pragma warning(disable: 4786)
 #include "ComObject.h"
 #include <stdexcept>
 #include "ComModule.h"
+#include "DispatchAdapter.h"
+#ifdef TCOM_VTBL_SERVER
 #include "InterfaceAdapter.h"
+#endif
 #include "Reference.h"
 #include "Extension.h"
 
@@ -76,10 +79,16 @@ ComObject::registerActiveObject (REFCLSID clsid)
     m_registeredActiveObject = true;
 }
 
-InterfaceAdapter *
+void *
 ComObject::implementInterface (const Interface &interfaceDesc)
 {
-    InterfaceAdapter *pAdapter = new InterfaceAdapter(*this, interfaceDesc);
+    void *pAdapter =
+#ifdef TCOM_VTBL_SERVER
+        new InterfaceAdapter(*this, interfaceDesc);
+#else
+        new DispatchAdapter(*this, interfaceDesc);
+#endif
+
     m_iidToAdapterMap.insert(interfaceDesc.iid(), pAdapter);
     return pAdapter;
 }
@@ -203,7 +212,7 @@ ComObject::queryInterface (REFIID iid, void **ppvObj)
     if (IsEqualIID(iid, IID_IDispatch)) {
         // Expose the operations of the default interface through IDispatch.
         if (m_pDispatch == 0) {
-            m_pDispatch = new InterfaceAdapter(*this, m_defaultInterface, true);
+            m_pDispatch = new DispatchAdapter(*this, m_defaultInterface);
         }
         *ppvObj = m_pDispatch;
         addRef();
@@ -216,7 +225,7 @@ ComObject::queryInterface (REFIID iid, void **ppvObj)
         return S_OK;
     }
 
-    InterfaceAdapter *pAdapter = m_iidToAdapterMap.find(iid);
+    void *pAdapter = m_iidToAdapterMap.find(iid);
     if (pAdapter == 0) {
         const Interface *pInterface = m_supportedInterfaceMap.find(iid);
         if (pInterface != 0) {
@@ -364,14 +373,22 @@ putOutVariant (Tcl_Interp *interp,
         }
         break;
 
+    case VT_SAFEARRAY:
+        if (*V_ARRAYREF(pDest) != 0) {
+            SafeArrayDestroy(*V_ARRAYREF(pDest));
+        }
+        *V_ARRAYREF(pDest) =
+            tclObject.getSafeArray(type.elementType(), interp);
+        break;
+
     default:
         *V_I4REF(pDest) = tclObject.getLong();
     }
 }
 
 HRESULT
-ComObject::invoke (InterfaceAdapter *pAdapter,
-                   DISPID dispid,
+ComObject::invoke (const Method &method,
+                   bool isProperty,
                    REFIID /*riid*/,
                    LCID /*lcid*/,
                    WORD wFlags,
@@ -380,11 +397,6 @@ ComObject::invoke (InterfaceAdapter *pAdapter,
                    EXCEPINFO *pExcepInfo,
                    UINT *pArgErr)
 {
-    // Get the method description for method being invoked.
-    const Method *pMethod = pAdapter->findDispatchMethod(dispid);
-    if (pMethod == 0) {
-        return DISP_E_MEMBERNOTFOUND;
-    }
 
     HRESULT hresult;
 
@@ -394,15 +406,14 @@ ComObject::invoke (InterfaceAdapter *pAdapter,
 
         // Get the method or property to invoke on the servant.
         std::string operation;
-        if ((wFlags & DISPATCH_PROPERTYGET) != 0
-         && pAdapter->isProperty(dispid)) {
-            operation = getPrefix + pMethod->name();
+        if ((wFlags & DISPATCH_PROPERTYGET) != 0 && isProperty) {
+            operation = getPrefix + method.name();
 
         } else if (wFlags & (DISPATCH_PROPERTYPUT | DISPATCH_PROPERTYPUTREF)) {
-            operation = setPrefix + pMethod->name();
+            operation = setPrefix + method.name();
 
         } else if (wFlags & DISPATCH_METHOD) {
-            operation = pMethod->name();
+            operation = method.name();
 
         } else {
             return DISP_E_MEMBERNOTFOUND;
@@ -420,7 +431,7 @@ ComObject::invoke (InterfaceAdapter *pAdapter,
         // Convert arguments to Tcl values.
         // TODO: Should handle named arguments differently than positional
         // arguments.
-        const Method::Parameters &parameters = pMethod->parameters();
+        const Method::Parameters &parameters = method.parameters();
 
         int argIndex = pDispParams->cArgs - 1;
         Method::Parameters::const_iterator pParam;
@@ -440,7 +451,7 @@ ComObject::invoke (InterfaceAdapter *pAdapter,
         if (wFlags & (DISPATCH_PROPERTYPUT | DISPATCH_PROPERTYPUTREF)) {
             VARIANT *pArg = &(pDispParams->rgvarg[argIndex]);
             try {
-                TclObject value(pArg, pMethod->type(), m_interp);
+                TclObject value(pArg, method.type(), m_interp);
                 script.lappend(value);
             }
             catch (_com_error &) {
@@ -474,27 +485,24 @@ ComObject::invoke (InterfaceAdapter *pAdapter,
         argIndex = pDispParams->cArgs - 1;
         for (pParam = parameters.begin(); pParam != parameters.end();
          ++pParam, --argIndex) {
-            if (pParam->flags() & PARAMFLAG_FOUT) {
+            VARIANT *pArg = &(pDispParams->rgvarg[argIndex]);
+            if ((pParam->flags() & PARAMFLAG_FOUT) && (V_VT(pArg) & VT_BYREF)) {
                 // Get name of Tcl variable that holds out value.
                 TclObject varName = getOutVariableName(*pParam);
 
                 // Copy variable value to out argument.
                 TclObject value;
                 if (getVariable(varName, value) == TCL_OK) {
-                    putOutVariant(
-                        m_interp,
-                        &pDispParams->rgvarg[argIndex],
-                        value,
-                        pParam->type());
+                    putOutVariant(m_interp, pArg, value, pParam->type());
                 }
             }
         }
 
         // Convert return value.
-        if (pReturnValue != 0 && pMethod->type().vartype() != VT_VOID) {
+        if (pReturnValue != 0 && method.type().vartype() != VT_VOID) {
             // Must increment reference count of interface pointers returned
             // from methods.
-            result.toVariant(pReturnValue, pMethod->type(), m_interp, true);
+            result.toVariant(pReturnValue, method.type(), m_interp, true);
         }
     }
     catch (_com_error &e) {
@@ -503,6 +511,8 @@ ComObject::invoke (InterfaceAdapter *pAdapter,
     }
     return hresult;
 }
+
+#ifdef TCOM_VTBL_SERVER
 
 // Convert the native value that the va_list points to into a Tcl object.
 // Returns a va_list pointing to the next argument.
@@ -580,6 +590,13 @@ convertNativeToTclObject (va_list pArg,
     case VT_VARIANT:
         tclObject = TclObject(
             byRef ? va_arg(pArg, VARIANT *) : &va_arg(pArg, VARIANT),
+            type,
+            interp);
+        break;
+
+    case VT_SAFEARRAY:
+        tclObject = TclObject(
+            byRef ? *va_arg(pArg, SAFEARRAY **) : va_arg(pArg, SAFEARRAY *),
             type,
             interp);
         break;
@@ -701,6 +718,11 @@ putArgument (va_list pArg,
                 interp,
                 true);
         }
+        break;
+
+    case VT_SAFEARRAY:
+        *static_cast<SAFEARRAY **>(pDest) =
+            tclObject.getSafeArray(type.elementType(), interp);
         break;
 
     default:
@@ -870,3 +892,5 @@ invokeComObjectFunction (volatile HRESULT hresult,
 
     va_end(pArg);
 }
+
+#endif

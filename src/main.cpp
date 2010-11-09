@@ -1,4 +1,4 @@
-// $Id: main.cpp,v 1.70 2002/07/14 18:42:57 cthuang Exp $
+// $Id: main.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include "ComModule.h"
 #include "Extension.h"

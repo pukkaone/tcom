@@ -1,4 +1,4 @@
-// $Id: infoCmd.cpp,v 1.31 2002/04/13 03:53:57 cthuang Exp $
+// $Id: infoCmd.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "Extension.h"
 #include "TclObject.h"
 #include "Reference.h"

@@ -1,4 +1,4 @@
-// $Id: variantCmd.cpp,v 1.1 2003/05/29 03:33:08 cthuang Exp $
+// $Id: variantCmd.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "Extension.h"
 #include <string.h>
 

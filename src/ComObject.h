@@ -1,4 +1,4 @@
-// $Id: ComObject.h,v 1.15 2002/10/22 22:07:55 cthuang Exp $
+// $Id: ComObject.h 13 2005-04-18 12:24:14Z cthuang $
 #ifndef COMOBJECT_H
 #define COMOBJECT_H
 
@@ -49,17 +49,17 @@ class TCOM_API ComObject
     SupportedInterfaceMap m_supportedInterfaceMap;
 
     // collection of implemented interface adapters
-    typedef HashTable<IID, InterfaceAdapter *> IidToAdapterMap;
+    typedef HashTable<IID, void *> IidToAdapterMap;
     IidToAdapterMap m_iidToAdapterMap;
 
     // implements default interface
-    InterfaceAdapter *m_pDefaultAdapter;
+    void *m_pDefaultAdapter;
 
     // implements ISupportErrorInfo
     SupportErrorInfo m_supportErrorInfo;
 
     // implements IDispatch
-    InterfaceAdapter *m_pDispatch;
+    void *m_pDispatch;
 
     // token returned from RegisterActiveObject
     unsigned long m_activeObjectHandle;
@@ -81,7 +81,7 @@ class TCOM_API ComObject
     void operator=(const ComObject &);  // not implemented
 
     // Create an adapter which implements the specified interface.
-    InterfaceAdapter *implementInterface(const Interface &interfaceDesc);
+    void *implementInterface(const Interface &interfaceDesc);
 
     // Convert IDispatch argument to Tcl value.
     TclObject getArgument(VARIANT *pArg, const Parameter &param);
@@ -136,15 +136,15 @@ public:
 
     // IDispatch implementation
     HRESULT invoke(
-        InterfaceAdapter *pThis,
-        DISPID dispidMember,
-        REFIID riid,
+        const Method &method,
+        bool isProperty,
+        REFIID iid,
         LCID lcid,
         WORD wFlags,
-        DISPPARAMS *pdispparams,
-        VARIANT *pvarResult,
-        EXCEPINFO *pexcepinfo,
-        UINT *puArgErr);
+        DISPPARAMS *pDispParams,
+        VARIANT *pReturnValue,
+        EXCEPINFO *pExcepInfo,
+        UINT *pArgErr);
 };
 
 #endif 

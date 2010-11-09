@@ -1,4 +1,4 @@
-// $Id: ActiveScriptError.cpp,v 1.1 2002/03/30 18:49:53 cthuang Exp $
+// $Id: ActiveScriptError.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "ActiveScriptError.h"
 
 STDMETHODIMP

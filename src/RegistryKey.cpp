@@ -1,4 +1,4 @@
-// $Id: RegistryKey.cpp,v 1.6 2001/11/28 16:10:57 cthuang Exp $
+// $Id: RegistryKey.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "RegistryKey.h"
 
 void

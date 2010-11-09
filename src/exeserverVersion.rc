@@ -1,4 +1,4 @@
-// $Id: exeserverVersion.rc,v 1.5 2002/04/27 18:15:24 cthuang Exp $
+// $Id: exeserverVersion.rc 5 2005-02-16 14:57:24Z cthuang $
 #include <winres.h>
 #include "version.h"
 #include "buildNumber.h"

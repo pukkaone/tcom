@@ -1,4 +1,4 @@
-// $Id: Arguments.cpp,v 1.35 2003/03/15 01:32:09 cthuang Exp $
+// $Id: Arguments.cpp 20 2005-05-04 16:53:05Z cthuang $
 #include "Arguments.h"
 #include "Extension.h"
 #include "TclObject.h"
@@ -41,17 +41,26 @@ TypedArguments::initArgument (
         // This variant indicates a missing optional argument.
         m_args[argIndex] = vtMissing;
 
-    } else if (parameter.flags() & PARAMFLAG_FOUT) {
-        // For out parameters, set a pointer to where the out value
-        // will be stored.
+    } else if (parameter.type().pointerCount() > 0) {
+        // The argument is passed by reference.
 
-        if (vt == VT_INT) {
+        switch (vt) {
+        case VT_INT:
             // IDispatch::Invoke returns DISP_E_TYPEMISMATCH on
             // VT_INT | VT_BYREF parameters.
             vt = VT_I4;
-        } else if (vt == VT_USERDEFINED) {
+            break;
+
+        case VT_UINT:
+            // IDispatch::Invoke returns DISP_E_TYPEMISMATCH on
+            // VT_UINT | VT_BYREF parameters.
+            vt = VT_UI4;
+            break;
+
+        case VT_USERDEFINED:
             // Assume user defined types derive from IUnknown.
             vt = VT_UNKNOWN;
+            break;
         }
 
         if (vt == VT_SAFEARRAY) {
@@ -70,19 +79,28 @@ TypedArguments::initArgument (
         }
 
         if (parameter.flags() & PARAMFLAG_FIN) {
-            // Set the value for an in/out parameter.
-            Tcl_Obj *pValue = Tcl_ObjGetVar2(
-                interp, pObj, NULL, TCL_LEAVE_ERR_MSG);
-            if (pValue == 0) {
-                return TCL_ERROR;
+            if (parameter.flags() & PARAMFLAG_FOUT) {
+                // Set the value for an in/out parameter.
+                Tcl_Obj *pValue = Tcl_ObjGetVar2(
+                    interp, pObj, NULL, TCL_LEAVE_ERR_MSG);
+                if (pValue == 0) {
+                    return TCL_ERROR;
+                }
+
+                TclObject value(pValue);
+
+                // If the argument is an interface pointer, increment its
+                // reference count because the _variant_t destructor will
+                // release it.
+                value.toNativeValue(
+                    &m_outValues[argIndex], parameter.type(), interp, true);
+            } else {
+                // If the argument is an interface pointer, increment its
+                // reference count because the _variant_t destructor will
+                // release it.
+                argument.toNativeValue(
+                    &m_outValues[argIndex], parameter.type(), interp, true);
             }
-
-            TclObject value(pValue);
-
-            // If the argument is an interface pointer, increment its reference
-            // count because the _variant_t destructor will release it.
-            value.toVariant(
-                &m_outValues[argIndex], parameter.type(), interp, true);
         } else {
             if (vt == VT_UNKNOWN) {
                 m_outValues[argIndex].vt = vt;
@@ -103,7 +121,8 @@ TypedArguments::initArgument (
     } else {
         // If the argument is an interface pointer, increment its reference
         // count because the _variant_t destructor will release it.
-        argument.toVariant(&m_args[argIndex], parameter.type(), interp, true);
+        argument.toNativeValue(
+            &m_args[argIndex], parameter.type(), interp, true);
     }
 
     return TCL_OK;
@@ -149,21 +168,22 @@ PositionalArguments::initialize (
     }
 
     if (method.vararg() && inputCount > 0) {
-        m_args = new _variant_t[inputCount];
+        m_args = new NativeValue[inputCount];
 
         // Convert the arguments actually provided.
         int inputIndex = 0;
         int argIndex = inputCount - 1;
         for (; inputIndex < inputCount; ++inputIndex, --argIndex) {
             TclObject value(objv[inputIndex]);
-            value.toVariant(&m_args[argIndex], Type::variant(), interp, true);
+            value.toNativeValue(
+                &m_args[argIndex], Type::variant(), interp, true);
         }
 
         paramCount = inputCount;
 
     } else if (paramCount > 0) {
-        m_args = new _variant_t[paramCount];
-        m_outValues = new _variant_t[paramCount];
+        m_args = new NativeValue[paramCount];
+        m_outValues = new NativeValue[paramCount];
 
         int j = paramCount - 1;
         Method::Parameters::const_iterator p = parameters.begin();
@@ -186,7 +206,7 @@ PositionalArguments::initialize (
         if (dispatchFlags == DISPATCH_PROPERTYPUT
          || dispatchFlags == DISPATCH_PROPERTYPUTREF) {
             TclObject value = objv[i];
-            value.toVariant(&m_args[j], method.type(), interp, true);
+            value.toNativeValue(&m_args[j], method.type(), interp, true);
         }
     }
 
@@ -244,8 +264,8 @@ NamedArguments::initialize (
 
     int cArgs = objc / 2;
     if (cArgs > 0) {
-        m_args = new _variant_t[cArgs];
-        m_outValues = new _variant_t[cArgs];
+        m_args = new NativeValue[cArgs];
+        m_outValues = new NativeValue[cArgs];
         m_namedDispids = new DISPID[cArgs];
 
         int j = cArgs - 1;
@@ -284,7 +304,7 @@ UntypedArguments::initialize (
     WORD dispatchFlags)
 {
     if (objc > 0) {
-        m_args = new _variant_t[objc];
+        m_args = new NativeValue[objc];
 
         int j = objc - 1;
         for (int i = 0; i < objc; ++i, --j) {
@@ -292,7 +312,7 @@ UntypedArguments::initialize (
 
             // If the argument is an interface pointer, increment its reference
             // count because the _variant_t destructor will release it.
-            value.toVariant(&m_args[j], Type::variant(), interp, true);
+            value.toNativeValue(&m_args[j], Type::variant(), interp, true);
         }
     }
 

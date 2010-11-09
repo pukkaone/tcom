@@ -1,4 +1,4 @@
-// $Id: HashTable.h,v 1.22 2003/07/17 22:33:31 cthuang Exp $
+// $Id: HashTable.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 

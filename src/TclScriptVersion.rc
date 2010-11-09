@@ -1,4 +1,4 @@
-// $Id: TclScriptVersion.rc,v 1.3 2002/04/27 18:15:24 cthuang Exp $
+// $Id: TclScriptVersion.rc 5 2005-02-16 14:57:24Z cthuang $
 #include <winres.h>
 #include "version.h"
 #include "buildNumber.h"

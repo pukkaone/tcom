@@ -1,4 +1,4 @@
-// $Id: SupportErrorInfo.h,v 1.3 2001/07/17 02:24:08 cthuang Exp $
+// $Id: SupportErrorInfo.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef SUPPORTERRORINFO_H
 #define SUPPORTERRORINFO_H
 

@@ -1,4 +1,4 @@
-// $Id: shortPathNameCmd.cpp,v 1.3 2002/04/13 03:53:57 cthuang Exp $
+// $Id: shortPathNameCmd.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "Extension.h"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

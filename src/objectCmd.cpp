@@ -1,4 +1,4 @@
-// $Id: objectCmd.cpp,v 1.31 2003/03/07 00:24:04 cthuang Exp $
+// $Id: objectCmd.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include "Extension.h"
 #include <sstream>

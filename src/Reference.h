@@ -1,4 +1,4 @@
-// $Id: Reference.h,v 1.42 2003/11/06 15:29:01 cthuang Exp $
+// $Id: Reference.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef REFERENCE_H
 #define REFERENCE_H
 
@@ -27,6 +27,26 @@ public:
 
     const _bstr_t &description () const
     { return m_description; }
+};
+
+// Throw this exception when invoke returns error about an argument.
+
+class InvokeException
+{
+    HRESULT m_hresult;
+    unsigned m_argIndex;
+
+public:
+    InvokeException (HRESULT hresult, unsigned argIndex):
+        m_hresult(hresult),
+        m_argIndex(argIndex)
+    { }
+
+    HRESULT hresult () const
+    { return m_hresult; }
+
+    unsigned argIndex () const
+    { return m_argIndex; }
 };
 
 // This class holds an interface pointer and the interface description needed

@@ -1,8 +1,9 @@
-// $Id: Arguments.h,v 1.8 2001/10/13 17:56:14 Administrator Exp $
+// $Id: Arguments.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef ARGUMENTS_H
 #define ARGUMENTS_H
 
 #include "TypeInfo.h"
+#include "NativeValue.h"
 
 class Arguments
 {
@@ -10,7 +11,7 @@ protected:
     DISPPARAMS m_dispParams;
 
     // argument values
-    _variant_t *m_args;
+    NativeValue *m_args;
 
     Arguments();
 
@@ -29,7 +30,7 @@ class TypedArguments: public Arguments
 {
 protected:
     // used to hold values returned from out parameters
-    _variant_t *m_outValues;
+    NativeValue *m_outValues;
 
     TypedArguments();
 

@@ -1,4 +1,4 @@
-// $Id: HandleSupport.cpp,v 1.19 2003/07/17 22:33:31 cthuang Exp $
+// $Id: HandleSupport.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "HandleSupport.h"
 #include <sstream>
 #include "ThreadLocalStorage.h"

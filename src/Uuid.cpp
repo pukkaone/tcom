@@ -1,4 +1,4 @@
-// $Id: Uuid.cpp,v 1.2 2000/04/20 18:37:40 chuang Exp $
+// $Id: Uuid.cpp 5 2005-02-16 14:57:24Z cthuang $
 #include "Uuid.h"
 
 std::string

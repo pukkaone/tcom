@@ -1,4 +1,4 @@
-// $Id: Extension.cpp,v 1.3 2003/04/02 22:46:51 cthuang Exp $
+// $Id: Extension.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include "Extension.h"
 #include "ComModule.h"

@@ -1,4 +1,4 @@
-// $Id: refCmd.cpp,v 1.46 2003/11/06 15:29:01 cthuang Exp $
+// $Id: refCmd.cpp 16 2005-04-19 14:47:52Z cthuang $
 #pragma warning(disable: 4786)
 #include "Extension.h"
 #include <sstream>
@@ -9,6 +9,8 @@
 
 static int referenceObjCmd(ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []);
 HandleSupport<Reference> Extension::referenceHandles(referenceObjCmd);
+
+static const char unknownErrorDescription[] = "Unknown error";
 
 // Check if the object implements ISupportErrorInfo.  If it does, get the
 // error information.  Return true if successful.
@@ -36,6 +38,59 @@ getErrorInfo (Reference *pReference, IErrorInfo **ppErrorInfo)
     return GetErrorInfo(0, ppErrorInfo) == S_OK;
 }
 
+// Get description text for an HRESULT.
+
+static Tcl_Obj *
+formatMessage (HRESULT hresult)
+{
+#if TCL_MINOR_VERSION >= 2
+    // Uses Unicode functions introduced in Tcl 8.2.
+    wchar_t *pMessage;
+    DWORD nLen = FormatMessageW(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL,
+        hresult,
+        0,
+        reinterpret_cast<LPWSTR>(&pMessage),
+        0,
+        NULL);
+#else
+    char *pMessage;
+    DWORD nLen = FormatMessageA(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL,
+        hresult,
+        0,
+        reinterpret_cast<LPSTR>(&pMessage),
+        0,
+        NULL);
+#endif
+
+    Tcl_Obj *pDescription;
+    if (nLen > 0) {
+        if (nLen > 1 && pMessage[nLen - 1] == '\n') {
+            --nLen;
+            if (nLen > 1 && pMessage[nLen - 1] == '\r') {
+                --nLen;
+            }
+        }
+        pMessage[nLen] = '\0';
+
+        
+#if TCL_MINOR_VERSION >= 2
+        // Uses Unicode functions introduced in Tcl 8.2.
+        pDescription = Tcl_NewUnicodeObj(pMessage, nLen);
+#else
+        pDescription = Tcl_NewStringObj(pMessage, nLen);
+#endif
+    } else {
+        pDescription = Tcl_NewStringObj(unknownErrorDescription, -1);
+    }
+    LocalFree(pMessage);
+
+    return pDescription;
+}
+
 // Set the Tcl errorCode variable and the Tcl interpreter result.
 // Returns TCL_ERROR.
 
@@ -43,7 +98,7 @@ static int
 setErrorCodeAndResult (
     Tcl_Interp *interp,
     HRESULT hresult,
-    const _bstr_t &description,
+    Tcl_Obj *pDescription,
     const char *file,
     int line)
 {
@@ -60,13 +115,8 @@ setErrorCodeAndResult (
     result.lappend(hrObj);
 
     // Append description.
-    const wchar_t *pWide = static_cast<const wchar_t *>(description);
-    if (pWide == 0) {
-        pWide = L"Unknown error";
-    }
-    TclObject descriptionObj(pWide);
-    errorCode.lappend(descriptionObj);
-    result.lappend(descriptionObj);
+    errorCode.lappend(pDescription);
+    result.lappend(pDescription);
 
 #ifndef NDEBUG
     // Append file and line number.
@@ -81,45 +131,29 @@ setErrorCodeAndResult (
     return TCL_ERROR;
 }
 
+static int
+setErrorCodeAndResult (
+    Tcl_Interp *interp,
+    HRESULT hresult,
+    const _bstr_t &description,
+    const char *file,
+    int line)
+{
+    TclObject descriptionObj;
+    int length;
+    Tcl_GetStringFromObj(descriptionObj, &length);
+    if (length == 0) {
+        descriptionObj = Tcl_NewStringObj(unknownErrorDescription, -1);
+    }
+    return setErrorCodeAndResult(interp, hresult, descriptionObj, file, line);
+}
+
 int
 Extension::setComErrorResult (
     Tcl_Interp *interp, _com_error &e, const char *file, int line)
 {
-    // Get description.
-    _bstr_t description;
-
-#if TCL_MINOR_VERSION >= 2
-    // Uses Unicode functions introduced in Tcl 8.2.
-    wchar_t *pMessage;
-    DWORD nLen = FormatMessageW(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL,
-        e.Error(),
-        0,
-        reinterpret_cast<LPWSTR>(&pMessage),
-        0,
-        NULL);
-
-    if (nLen > 0) {
-        if (nLen > 1 && pMessage[nLen - 1] == '\n') {
-            --nLen;
-            if (nLen > 1 && pMessage[nLen - 1] == '\r') {
-                --nLen;
-            }
-        }
-        pMessage[nLen] = '\0';
-
-        description = _bstr_t(pMessage);
-    } else {
-        // FormatMessageW doesn't seem to work on Windows 95/98.
-        description = _bstr_t(e.ErrorMessage());
-    }
-    LocalFree(pMessage);
-#else
-    description = _bstr_t(e.ErrorMessage());
-#endif
-
-    return setErrorCodeAndResult(interp, e.Error(), description, file, line);
+    return setErrorCodeAndResult(
+        interp, e.Error(), formatMessage(e.Error()), file, line);
 }
 
 // Invoke a method or property.
@@ -135,7 +169,7 @@ invoke (Tcl_Interp *interp,
         WORD dispatchFlags)
 {
     // Set up return value.
-    _variant_t returnValue;
+    NativeValue returnValue;
     VARIANT *pReturnValue = (pMethod->type().vartype() == VT_VOID)
         ? 0 : &returnValue;
 
@@ -286,7 +320,7 @@ invokeWithoutInterfaceDesc (
     }
 
     // Set up return value.
-    _variant_t varReturnValue;
+    NativeValue varReturnValue;
     VARIANT *pReturnValue =
         (dispatchFlags & DISPATCH_PROPERTYPUT) ? 0 : &varReturnValue;
 
@@ -339,10 +373,10 @@ referenceObjCmd (
     int i = 1;
     for (; i < objc; ++i) {
         static char *options[] = {
-	    "-get", "-method", "-namedarg", "-set", NULL
+	    "-call", "-get", "-method", "-namedarg", "-set", NULL
         };
         enum OptionEnum {
-            OPTION_GET, OPTION_METHOD, OPTION_NAMEDARG, OPTION_SET
+            OPTION_CALL, OPTION_GET, OPTION_METHOD, OPTION_NAMEDARG, OPTION_SET
         };
 
         int index;
@@ -352,11 +386,12 @@ referenceObjCmd (
         }
 
         switch (index) {
-        case OPTION_GET:
-            dispatchFlags = DISPATCH_PROPERTYGET;
-            break;
+        case OPTION_CALL:
         case OPTION_METHOD:
             dispatchFlags = DISPATCH_METHOD;
+            break;
+        case OPTION_GET:
+            dispatchFlags = DISPATCH_PROPERTYGET;
             break;
         case OPTION_NAMEDARG:
             namedArgOpt = true;
@@ -460,6 +495,18 @@ referenceObjCmd (
         result = setErrorCodeAndResult(
             interp, e.scode(), e.description(), __FILE__, __LINE__);
     }
+    catch (InvokeException &e) {
+        std::ostringstream argOut;
+        argOut << "Argument " << e.argIndex() << ": ";
+        TclObject descriptionObj(argOut.str());
+
+        TclObject messageObj(formatMessage(e.hresult()));
+        Tcl_AppendObjToObj(descriptionObj, messageObj);
+
+        result = setErrorCodeAndResult(
+            interp, e.hresult(), descriptionObj, __FILE__, __LINE__);
+    }
+
     return result;
 }
 

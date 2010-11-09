@@ -1,4 +1,6 @@
-// $Id: InterfaceAdapterVtbl.cpp,v 1.3 2001/10/13 17:56:14 Administrator Exp $
+// $Id: InterfaceAdapterVtbl.cpp 16 2005-04-19 14:47:52Z cthuang $
+#ifdef TCOM_VTBL_SERVER
+
 #pragma warning(disable: 4786)
 #include "InterfaceAdapter.h"
 #include "ComObject.h"
@@ -1076,7 +1078,7 @@ FUNCTION_ENTRY_POINT(1021)
 FUNCTION_ENTRY_POINT(1022)
 FUNCTION_ENTRY_POINT(1023)
 
-const void *InterfaceAdapter::unknownVtbl[] = {
+const void *InterfaceAdapter::customVtbl[] = {
     InterfaceAdapter::QueryInterface,
     InterfaceAdapter::AddRef,
     InterfaceAdapter::Release,
@@ -2103,7 +2105,7 @@ const void *InterfaceAdapter::unknownVtbl[] = {
     function_1023
 };
 
-const void *InterfaceAdapter::dispatchVtbl[] = {
+const void *InterfaceAdapter::dualVtbl[] = {
     InterfaceAdapter::QueryInterface,
     InterfaceAdapter::AddRef,
     InterfaceAdapter::Release,
@@ -3129,3 +3131,5 @@ const void *InterfaceAdapter::dispatchVtbl[] = {
     function_1022,
     function_1023
 };
+
+#endif

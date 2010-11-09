@@ -1,4 +1,4 @@
-// $Id: configureCmd.cpp,v 1.7 2002/04/13 03:53:57 cthuang Exp $
+// $Id: configureCmd.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include "Extension.h"
 

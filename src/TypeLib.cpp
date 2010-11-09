@@ -1,4 +1,4 @@
-// $Id: TypeLib.cpp,v 1.29 2002/03/09 16:40:24 cthuang Exp $
+// $Id: TypeLib.cpp 9 2005-04-07 14:14:37Z cthuang $
 #pragma warning(disable: 4786)
 #include <sstream>
 #include "RegistryKey.h"
@@ -148,7 +148,7 @@ TypeLib::loadByLibid (const std::string &libidStr, const std::string &version)
 
     ITypeLibPtr pTypeLib;
     HRESULT hr = LoadRegTypeLib(
-        libid, majorVersion, minorVersion, LOCALE_USER_DEFAULT, &pTypeLib);
+        libid, majorVersion, minorVersion, LOCALE_NEUTRAL, &pTypeLib);
     if (FAILED(hr)) {
         _com_issue_error(hr);
     }

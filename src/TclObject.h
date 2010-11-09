@@ -1,9 +1,10 @@
-// $Id: TclObject.h,v 1.12 2002/04/12 02:55:28 cthuang Exp $
+// $Id: TclObject.h 16 2005-04-19 14:47:52Z cthuang $
 #ifndef TCLOBJECT_H
 #define TCLOBJECT_H
 
 #ifdef WIN32
 #include "TypeInfo.h"
+#include "NativeValue.h"
 #endif
 #include <tcl.h>
 #include <string>
@@ -101,10 +102,19 @@ public:
     TclObject &lappend(Tcl_Obj *pElement);
 
 #ifdef WIN32
-    // Construct Tcl object from VARIANT value.
+    // Construct Tcl object from native machine value.
     TclObject(
-        VARIANT *pSrc,          // VARIANT value to convert from
+        VARIANT *pSrc,          // value to convert from
         const Type &type,       // expected type for interface pointers
+        Tcl_Interp *interp);
+
+    // Construct Tcl object from _bstr_t.
+    TclObject(const _bstr_t &src);
+
+    // Construct Tcl object from SAFEARRAY.
+    TclObject(
+        SAFEARRAY *psa,         // value to convert from
+        const Type &type,       // array type
         Tcl_Interp *interp);
 
     // Convert Tcl object to VARIANT value.
@@ -114,9 +124,20 @@ public:
         Tcl_Interp *interp,
         bool addRef=false);     // call AddRef on interface pointer
 
+    // Convert Tcl object to native machine value.
+    void toNativeValue(
+        NativeValue *pDest,     // converted value put here
+        const Type &type,       // desired data type
+        Tcl_Interp *interp,
+        bool addRef=false);     // call AddRef on interface pointer
+
     // Get BSTR representation.  Caller is responsible for freeing the
     // returned BSTR.
     BSTR getBSTR() const;
+
+    // Get SAFEARRAY representation.  Caller is responsible for freeing the
+    // returned array.
+    SAFEARRAY *getSafeArray(const Type &elementType, Tcl_Interp *interp) const;
 #endif
 };
 

@@ -1,4 +1,4 @@
-// $Id: Uuid.h,v 1.3 2000/04/28 19:37:53 chuang Exp $
+// $Id: Uuid.h 5 2005-02-16 14:57:24Z cthuang $
 #ifndef UUID_H
 #define UUID_H
 

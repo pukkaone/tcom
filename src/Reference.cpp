@@ -1,4 +1,4 @@
-// $Id: Reference.cpp,v 1.73 2003/11/06 15:29:01 cthuang Exp $
+// $Id: Reference.cpp 5 2005-02-16 14:57:24Z cthuang $
 #pragma warning(disable: 4786)
 #include <string.h>
 #include "ComObject.h"
@@ -231,6 +231,8 @@ Reference::invokeDispatch (
 
     if (hr == DISP_E_EXCEPTION) {
         throwDispatchException(excepInfo);
+    } else if (hr == DISP_E_TYPEMISMATCH || hr == DISP_E_PARAMNOTFOUND) {
+        throw InvokeException(hr, pParams->cArgs - argErr);
     }
 
     return hr;
@@ -264,6 +266,8 @@ Reference::invoke (MEMBERID memberid,
 
         if (hr == DISP_E_EXCEPTION) {
             throwDispatchException(excepInfo);
+        } else if (hr == DISP_E_TYPEMISMATCH || hr == DISP_E_PARAMNOTFOUND) {
+            throw InvokeException(hr, arguments.dispParams()->cArgs - argErr);
         }
     }
 
