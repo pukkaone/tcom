@@ -1,0 +1,49 @@
+# $Id: namedarg.test,v 1.2 2003/04/02 22:57:35 cthuang Exp $
+#
+# This file contains tests invoking methods through IDispatch with named
+# arguments.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+test namedarg-1.1 {named arguments, ChartWizard} {
+    package require tcom
+
+    set application [::tcom::ref createobject "Excel.Application"]
+    $application Visible 1
+
+    set workbooks [$application Workbooks]
+    set workbook [$workbooks Add]
+    set worksheets [$workbook Worksheets]
+    set worksheet [$worksheets Item [expr 1]]
+
+    set cells [$worksheet Cells]
+    $cells Item 1 A "North"
+    $cells Item 1 B "South"
+    $cells Item 1 C "East"
+    $cells Item 1 D "West"
+    $cells Item 2 A 5.2
+    $cells Item 2 B 10.0
+    $cells Item 2 C 8.0
+    $cells Item 2 D 20.0
+    set sourceRange [$worksheet Range "A1" "D2"]
+
+    set charts [$workbook Charts]
+    set chart [$charts Add]
+    $chart -namedarg ChartWizard \
+	Source $sourceRange \
+	Gallery [expr 5] \
+	PlotBy [expr 1] \
+	CategoryLabels [expr 1] \
+	SeriesLabels [expr 0] \
+	Title "Sales Percentages"
+
+    # Prevent Excel from prompting to save the document on close.
+    $workbook Saved 1
+    $application Quit
+} {}
+
+::tcltest::cleanupTests
+return

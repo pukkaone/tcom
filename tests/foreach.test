@@ -1,0 +1,42 @@
+# $Id: foreach.test,v 1.2 2003/03/07 00:01:40 cthuang Exp $
+#
+# This file contains tests for the ::tcom::foreach command.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+test foreach-1.1 {::tcom::foreach} {
+    package require tcom
+
+    set application [::tcom::ref createobject "Excel.Application"]
+    $application Visible 1
+
+    set workbooks [$application Workbooks]
+    set workbook [$workbooks Add]
+    set worksheets [$workbook Worksheets]
+    set worksheet [$worksheets Item [expr 1]]
+
+    set cells [$worksheet Cells]
+    set i 0
+    foreach row {1 2 3} {
+	foreach column {A B C} {
+	    $cells Item $row $column [incr i]
+	}
+    }
+
+    set addresses {}
+    set range [$worksheet Range "A1:C3"]
+    ::tcom::foreach cell $range {
+	lappend addresses [$cell Address]
+    }
+
+    $workbook Saved 1
+    $application Quit
+
+    set addresses
+} {{$A$1} {$B$1} {$C$1} {$A$2} {$B$2} {$C$2} {$A$3} {$B$3} {$C$3}}
+
+::tcltest::cleanupTests
+return

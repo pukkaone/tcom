@@ -1,0 +1,34 @@
+# $Id: server.itcl,v 1.7 2002/06/29 15:34:52 cthuang Exp $
+package provide Banking 1.0
+
+package require Itcl
+namespace import ::itcl::*
+
+package require tcom
+::tcom::import [file join [file dirname [info script]] Banking.tlb]
+
+class AccountImpl {
+    private variable balance 0
+
+    public method _get_Balance {} {
+	return $balance
+    }
+
+    public method Deposit {amount} {
+	set balance [expr $balance + $amount]
+    }
+
+    public method Withdraw {amount} {
+	set balance [expr $balance - $amount]
+    }
+}
+
+class BankImpl {
+    public method CreateAccount {} {
+        set accountImpl [AccountImpl #auto]
+	return [::tcom::object create ::Banking::Account \
+	    [code $accountImpl] {delete object}]
+    }
+}
+
+::tcom::object registerfactory ::Banking::Bank {BankImpl #auto} {delete object}

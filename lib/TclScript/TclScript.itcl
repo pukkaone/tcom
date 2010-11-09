@@ -1,0 +1,441 @@
+# $Id: TclScript.itcl,v 1.6 2003/11/08 17:38:09 cthuang Exp $
+
+package require Itcl
+namespace import itcl::*
+
+package require tcom
+::tcom::import [file join [file dirname [info script]] TclScript.tlb]
+
+class Engine {
+    # common HRESULT values
+    common S_FALSE	0x00000001
+    common E_NOTIMPL	0x80004001
+    common E_FAIL	0x80004005
+
+    # engine states
+    common SCRIPTSTATE_UNINITIALIZED	0
+    common SCRIPTSTATE_INITIALIZED	5
+    common SCRIPTSTATE_STARTED		1
+    common SCRIPTSTATE_CONNECTED	2
+    common SCRIPTSTATE_DISCONNECTED	3
+    common SCRIPTSTATE_CLOSED		4
+
+    # map script state code to description
+    common scriptStateDesc
+    array set scriptStateDesc {
+	0	SCRIPTSTATE_UNINITIALIZED
+	5	SCRIPTSTATE_INITIALIZED
+	1	SCRIPTSTATE_STARTED
+	2	SCRIPTSTATE_CONNECTED
+	3	SCRIPTSTATE_DISCONNECTED
+	4	SCRIPTSTATE_CLOSED
+    }
+
+    # flags passed into AddNamedItem method
+    common SCRIPTITEM_ISVISIBLE		2
+    common SCRIPTITEM_ISSOURCE		4
+    common SCRIPTITEM_GLOBALMEMBERS	8
+    common SCRIPTITEM_ISPERSISTENT	0x40
+    common SCRIPTITEM_CODEONLY		0x200
+    common SCRIPTITEM_NOCODE		0x400
+
+    # true if logging to debug output enabled
+    common logDebugOn_ 1
+
+    # SCRIPTSTATE
+    variable scriptState_
+
+    # IActiveScriptSite
+    variable scriptSite_
+
+    # slave interpreter used to execute scripts
+    variable slave_
+
+    # code to execute
+    public variable code_ {}
+
+    # list of names of items which have global members
+    variable globalMemberItems_ {}
+
+    # list of names of item commands added to the Tcl interpreter
+    variable itemCommands_ {}
+
+    # array of scripts to execute for each event
+    variable eventCode_
+    array set eventCode_ {}
+
+    # array of item and sub-item names of event sources
+    variable eventSources_
+    array set eventSources_ {}
+
+    # array of connected event sources
+    variable connectedSources_
+    array set connectedSources_ {}
+
+    constructor {} {
+	set scriptState_ $SCRIPTSTATE_UNINITIALIZED
+
+	log "Engine::constructor"
+    }
+
+    destructor {
+	log "Engine::destructor"
+    }
+
+    method createItemCommand {itemName unknown} {
+	log "createItemCommand $itemName $unknown"
+
+	$slave_ alias ::$itemName $unknown
+	lappend itemCommands_ $itemName
+    }
+
+    method resolveUnknownCommand {args} {
+	log "resolveUnknownCommand $args"
+
+	# See if any named items have a sub-item with that name.
+	set subItemName [lindex $args 0]
+	foreach itemName $globalMemberItems_ {
+	    set obj [::TclScriptEngine::getnameditem \
+		$scriptSite_ $itemName $subItemName]
+	    if {[string equal [::tcom::typeof $obj] cmdName]} {
+		createItemCommand $subItemName $obj
+		return [eval $obj [lrange $args 1 end]]
+	    }
+	}
+
+	# Fall back to original unknown.
+	if {![$slave_ issafe]} {
+	    $slave_ eval ::TclScriptEngine::oldUnknown $args
+	}
+    }
+
+    method log {msg} {
+	if {$logDebugOn_} {
+	    ::tcom::outputdebug "$this $msg"
+	}
+    }
+
+    method dumpInterface {obj} {
+	set interface [::tcom::info interface $obj]
+	log "interface [$interface name]"
+
+	set properties [$interface properties]
+	foreach property $properties {
+	    log "property $property"
+	}
+
+	set methods [$interface methods]
+	foreach method $methods {
+	    log "method [lrange $method 0 2] \{"
+	    set parameters [lindex $method 3]
+	    foreach parameter $parameters {
+		log "    \{$parameter\}"
+	    }
+	    log "\}"
+	}
+    }
+
+    method evaluateCode {code} {
+	$scriptSite_ OnEnterScript
+	if {[catch {$slave_ eval $code} result]} {
+	    log $::errorInfo
+	    set error [::TclScriptEngine::activescripterror \
+		$E_FAIL TclScript $result 0 0 $::errorInfo]
+	    $scriptSite_ OnScriptError $error
+	}
+	$scriptSite_ OnLeaveScript
+    }
+
+    method changeScriptState {newState} {
+	log "changeScriptState $scriptStateDesc($scriptState_) $scriptStateDesc($newState)"
+
+	set scriptState_ $newState
+	if {[info exists scriptSite_]} {
+	    if {[catch {
+		$scriptSite_ OnStateChange $newState
+	    }]} {
+		log $::errorInfo
+	    }
+	}
+
+	switch -- $newState \
+	    $SCRIPTSTATE_STARTED {
+		evaluateCode $code_
+		set code_ {}
+	    }
+    }
+
+    method sink {sourceName eventName args} {
+	if {[info exists eventCode_($sourceName,$eventName)]} {
+	    $slave_ eval $eventCode_($sourceName,$eventName)
+	}
+    }
+
+    method connectToSources {} {
+	foreach sourceName [array names eventSources_] {
+	    # Check if the source is already connected to a sink.
+	    if {![info exists connectedSources_($sourceName)]} {
+		set itemName [lindex $eventSources_($sourceName) 0]
+		set subItemName [lindex $eventSources_($sourceName) 1]
+		set source [::TclScriptEngine::getnameditem \
+		    $scriptSite_ $itemName $subItemName]
+
+		::tcom::bind $source "$this sink $sourceName"
+
+		set connectedSources_($sourceName) $source
+	    }
+	}
+    }
+
+    method disconnectFromSources {} {
+	foreach {sourceName source} [array get connectedSources_] {
+	    ::tcom::bind $source {}
+	    unset connectedSources_($sourceName)
+	}
+    }
+
+    # Raise not implemented error.
+    method errorNotImpl {} {
+	set messageText "Not implemented"
+	error $messageText {} [list COM $E_NOTIMPL $messageText]
+    }
+
+    # IActiveScript implementation
+
+    method SetScriptSite {site} {
+	log "IActiveScript::SetScriptSite $site"
+
+	set scriptSite_ $site
+    }
+
+    method GetScriptSite {iid ppvObject} {
+	log "IActiveScript::GetScriptSite $iid"
+
+	upvar $ppvObject pvObject 
+	set pvObject $scriptSite_
+    }
+
+    method SetScriptState {newState} {
+	log "IActiveScript::SetScriptState $scriptStateDesc($newState)"
+
+	switch -- $newState \
+	    $SCRIPTSTATE_STARTED {
+		if {$scriptState_ != $SCRIPTSTATE_INITIALIZED} {
+		    error "must be in INITIALIZED state to go to STARTED state"
+		}
+	    } \
+	    $SCRIPTSTATE_CONNECTED {
+		connectToSources
+	    } \
+	    $SCRIPTSTATE_DISCONNECTED {
+		disconnectFromSources
+	    }
+
+	if {$newState != $scriptState_} {
+	    changeScriptState $newState
+	}
+    }
+
+    method GetScriptState {pState} {
+	log "IActiveScript::GetScriptState"
+
+	upvar $pState state 
+	set state $scriptState_
+    }
+
+    method Close {} {
+	log "IActiveScript::Close"
+
+	changeScriptState $SCRIPTSTATE_CLOSED
+
+	# Clear object references.
+	foreach itemName $itemCommands_ {
+	    log "delete command $itemName"
+	    $slave_ alias ::$itemName {}
+	}
+
+	set eventSources_ {}
+	set scriptSite_ {}
+	unset scriptSite_
+
+	interp delete $slave_
+	log "IActiveScript::Close done"
+    }
+
+    method AddNamedItem {name flags} {
+	log "IActiveScript::AddNamedItem $name $flags"
+
+	set unknown [::TclScriptEngine::getnameditem $scriptSite_ $name]
+
+	if {$flags & $SCRIPTITEM_GLOBALMEMBERS} {
+	    lappend globalMemberItems_ $name
+	}
+
+	if {$flags & $SCRIPTITEM_ISVISIBLE} {
+	    createItemCommand $name $unknown
+	}
+    }
+
+    method AddTypeLib {libid major minor flags} {
+	log "IActiveScript::AddTypeLib"
+	errorNotImpl
+    }
+
+    method GetScriptDispatch {itemName ppDispatch} {
+	log "IActiveScript::GetScriptDispatch $itemName"
+	upvar $ppDispatch pDispatch 
+
+	if {[string length $itemName] == 0} {
+	    set pDispatch [::tcom::object create ::TclScript::Dispatch \
+		[namespace current]::$this]
+	    return
+	}
+
+	set pDispatch 0
+	set messageText "Not implemented"
+	error $messageText {} [list COM $S_FALSE $messageText]
+    }
+
+    method GetCurrentScriptThreadID {pScriptThreadId} {
+	log "IActiveScript::GetCurrentScriptThreadID"
+	upvar $pScriptThreadId scriptThreadId 
+	set scriptThreadId 0
+	errorNotImpl
+    }
+
+    method GetScriptThreadID {win32ThreadId pScriptThreadId} {
+	log "IActiveScript::GetScriptThreadID"
+	upvar $pScriptThreadId scriptThreadId 
+	set scriptThreadId 0
+	errorNotImpl
+    }
+
+    method GetScriptThreadState {scriptThreadId pScriptThreadState} {
+	log "IActiveScript::GetScriptThreadState"
+	errorNotImpl
+    }
+
+    method InterruptScriptThread {scriptThreadId excepInfo flags} {
+	log "IActiveScript::InterruptScriptThread"
+	errorNotImpl
+    }
+
+    method Clone {ppScript} {
+	log "IActiveScript::Clone"
+	upvar $ppScript pScript
+
+	set engine [Engine #auto]
+	$engine configure -code_ $code_
+	$engine InitNew
+
+	set pScript [::tcom::object create ::TclScript::Engine \
+	    [namespace current]::$engine {delete object}]
+    }
+
+    # IActiveScriptParse implementation
+
+    method InitNew {} {
+	log "IActiveScriptParse::InitNew"
+
+	if {$safetyOptions & $INTERFACESAFE_FOR_UNTRUSTED_DATA} {
+	    set slave_ [interp create -safe]
+	} else {
+	    set slave_ [interp create]
+	    $slave_ eval rename unknown ::TclScriptEngine::oldUnknown
+	}
+	$slave_ alias unknown $this resolveUnknownCommand
+
+	changeScriptState $SCRIPTSTATE_INITIALIZED
+    }
+
+    method AddScriptlet {
+	defaultName code itemName subItemName eventName delimiter
+	sourceContextCookie startingLineNumber flags pName pExcepInfo
+    } {
+	log "IActiveScriptParse::AddScriptlet $defaultName"
+	log "code $code"
+	log "itemName $itemName"
+	log "subItemName $subItemName"
+	log "eventName $eventName"
+
+	set sourceName $itemName
+	if {[string length $subItemName] > 0} {
+	    append sourceName _ $subItemName
+	}
+
+	set eventSources_($sourceName) [list $itemName $subItemName]
+	set eventCode_($sourceName,$eventName) $code
+	connectToSources
+
+	upvar $pName name
+	set name $sourceName
+    }
+
+    method ParseScriptText {
+	code itemName pContext delimiter
+	sourceContextCookie startingLineNumber flags pVarResult pExcepInfo
+    } {
+	set code [string map { \r\n \n } $code]
+	log "IActiveScriptParse::ParseScriptText $code"
+	log "itemName $itemName"
+	log "flags $flags"
+
+	switch -- $scriptState_ \
+	    $SCRIPTSTATE_INITIALIZED {
+		append code_ $code
+	    } \
+	    $SCRIPTSTATE_STARTED - \
+	    $SCRIPTSTATE_CONNECTED - \
+	    $SCRIPTSTATE_DISCONNECTED {
+		evaluateCode $code
+	    } \
+	    default {
+		error "invalid script state $scriptState_"
+	    }
+    }
+
+    # IObjectSafety implementation
+
+    # option flags
+    common INTERFACESAFE_FOR_UNTRUSTED_CALLER 1
+    common INTERFACESAFE_FOR_UNTRUSTED_DATA   2
+    common INTERFACE_USES_DISPEX              4
+    common INTERFACE_USES_SECURITY_MANAGER    8
+
+    # Internet Explorer seems to insist we say we support all the options
+    # even though we refuse to accept some.
+    common SUPPORTED_SAFETY_OPTIONS [expr \
+	$INTERFACESAFE_FOR_UNTRUSTED_CALLER | \
+	$INTERFACESAFE_FOR_UNTRUSTED_DATA | \
+	$INTERFACE_USES_DISPEX | \
+	$INTERFACE_USES_SECURITY_MANAGER]
+
+    # currently set safety options
+    variable safetyOptions 0
+
+    method GetInterfaceSafetyOptions {iid pSupportedOptions pEnabledOptions} {
+	log "GetInterfaceSafetyOptions $iid" 
+
+	upvar $pSupportedOptions supportedOptions
+	upvar $pEnabledOptions enabledOptions
+	set supportedOptions $SUPPORTED_SAFETY_OPTIONS
+	set enabledOptions $safetyOptions
+    }
+
+    method SetInterfaceSafetyOptions {iid optionSetMask enabledOptions} {
+	log "SetInterfaceSafetyOptions $iid $optionSetMask $enabledOptions" 
+
+	# Check optionSetMask for options we don't support.
+	if {$optionSetMask & ~$SUPPORTED_SAFETY_OPTIONS} {
+	    error "tried to set unsupported option"
+	}
+
+	set safetyOptions [expr ($safetyOptions & ~$optionSetMask) | \
+	    ($enabledOptions & $optionSetMask)]
+
+	log "safetyOptions $safetyOptions"
+    }
+}
+
+::tcom::object registerfactory ::TclScript::Engine \
+    {Engine #auto} {delete object}

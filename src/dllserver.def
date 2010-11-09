@@ -1,0 +1,5 @@
+LIBRARY tcominproc.dll
+
+EXPORTS
+	DllCanUnloadNow    PRIVATE
+	DllGetClassObject  PRIVATE

@@ -1,0 +1,62 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+        [
+                object,
+                uuid(0A0059C4-E0B0-11D2-942A-00C04F7040AB),
+                dual,
+                helpstring("IAccount Interface"),
+                pointer_default(unique)
+        ]
+        interface IAccount: IDispatch
+        {
+                [id(1), propget, helpstring("property Balance")]
+                HRESULT Balance([out, retval] long *pValue);
+
+                [id(2), helpstring("method Deposit")]
+                HRESULT Deposit([in] long amount);
+
+                [id(3), helpstring("method Withdraw")]
+                HRESULT Withdraw([in] long amount);
+        };
+
+        [
+                object,
+                uuid(0A0059C4-E0B0-11D2-942A-00C04F7040AC),
+                dual,
+                helpstring("IBank Interface"),
+                pointer_default(unique)
+        ]
+        interface IBank: IDispatch
+        {
+                [id(1), helpstring("method CreateAccount")]
+                HRESULT CreateAccount([out, retval] IAccount **ppAccount);
+        };
+
+[
+        uuid(0A0059B8-E0B0-11D2-942A-00C04F7040AB),
+        version(1.0),
+        helpstring("Banking 1.0 Type Library")
+]
+library Banking
+{
+        importlib("stdole32.tlb");
+
+        [
+                uuid(0A0059C5-E0B0-11D2-942A-00C04F7040AB),
+                helpstring("Account Class")
+        ]
+        coclass Account
+        {
+                [default] interface IAccount;
+        };
+
+        [
+                uuid(0A0059C5-E0B0-11D2-942A-00C04F7040AC),
+                helpstring("Bank Class")
+        ]
+        coclass Bank
+        {
+                [default] interface IBank;
+        };
+};

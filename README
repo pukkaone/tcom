@@ -1,0 +1,23 @@
+Tcom is a Windows-specific Tcl extension that provides commands to access and
+implement COM objects.  This extension enables client-side and server-side
+scripting of COM objects through IDispatch and IUnknown derived interfaces.
+
+INSTALLATION
+
+This distribution includes compiled libraries that can be loaded by the binary
+release of Tcl/Tk 8.2 or later for Windows.  Copy the contents of the lib
+directory to the Tcl library directory.  For example, if the Tcl library
+directory is C:\Tcl\lib, enter this command at the command prompt:
+
+    xcopy lib C:\Tcl\lib /s
+
+
+TCL ACTIVE SCRIPT ENGINE
+
+This distribution includes an experimental implementation of a Tcl Active
+Script engine.  It implements just enough of the IActiveScript and
+IActiveScriptParse interfaces to enable Internet Explorer and Windows Script
+Host to run simple scripts.  It works with the ActiveTcl binary distribution
+from ActiveState.  To register the script engine (assuming the Tcl library
+directory is C:\Tcl\lib), change the current working directory to
+C:\Tcl\lib\TclScript and run the register.tcl script.

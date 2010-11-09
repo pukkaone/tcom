@@ -1,0 +1,53 @@
+# $Id: array.test,v 1.1 2003/05/12 23:31:03 cthuang Exp $
+#
+# This file contains tests for the passing arrays
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+test array-1.1 {one-dimensional array} {
+    package require tcom
+
+    set application [::tcom::ref createobject "Excel.Application"]
+    $application Visible 1
+
+    set workbooks [$application Workbooks]
+    set workbook [$workbooks Add]
+    set worksheets [$workbook Worksheets]
+    set worksheet [$worksheets Item [expr 1]]
+
+    set range [$worksheet Range "A1" "C1"]
+    $range Value [list 1 2 3]
+    set value [$range Value]
+
+    $workbook Saved 1
+    $application Quit
+
+    set value
+} {{1.0 2.0 3.0}}
+
+test array-1.2 {two-dimensional array} {
+    package require tcom
+
+    set application [::tcom::ref createobject "Excel.Application"]
+    $application Visible 1
+
+    set workbooks [$application Workbooks]
+    set workbook [$workbooks Add]
+    set worksheets [$workbook Worksheets]
+    set worksheet [$worksheets Item [expr 1]]
+
+    set range [$worksheet Range "A1" "C2"]
+    $range Value [list [list 1 2 3] [list 4 5 6]]
+    set value [$range Value]
+
+    $workbook Saved 1
+    $application Quit
+
+    set value
+} {{1.0 2.0 3.0} {4.0 5.0 6.0}}
+
+::tcltest::cleanupTests
+return

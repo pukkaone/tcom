@@ -1,0 +1,35 @@
+# $Id: eval.test,v 1.2 2003/04/02 22:57:35 cthuang Exp $
+#
+# This file contains tests the robustness of handles under eval.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+test eval-1.1 {eval} {
+    package require tcom
+
+    for {set i 1} {$i <= 9} {incr i} {
+	proc testEval$i {} {
+	}
+    }
+
+    proc testEval {n} {
+	set application [::tcom::ref createobject "Excel.Application"]
+	eval $application Visible 0
+
+	for {set i 1} {$i <= $n} {incr i} {
+	    eval testEval$i
+	}
+
+	$application Visible 0
+    }
+
+    for {set i 1} {$i <= 9} {incr i} {
+	testEval $i
+    }
+} {}
+
+::tcltest::cleanupTests
+return

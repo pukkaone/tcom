@@ -1,0 +1,36 @@
+import "activscp.idl";
+import "objsafe.idl";
+
+#if _MSC_VER >= 1300
+#define IActiveScriptParse IActiveScriptParse32
+#endif
+
+[
+        uuid(0A0059B8-E0B0-11D2-942A-00C04F7040AC),
+        version(1.0),
+        helpstring("TclScript 1.0 Type Library")
+]
+library TclScript
+{
+        importlib("stdole32.tlb");
+
+        [
+                uuid(0A0059C5-E0B0-11D2-942A-00C04F7040AD),
+                helpstring("Engine Class")
+        ]
+        coclass Engine
+        {
+                [default] interface IActiveScript;
+                interface IActiveScriptParse;
+                interface IObjectSafety;
+        };
+
+        [
+                uuid(0A0059C5-E0B0-11D2-942A-00C04F7040AE),
+                helpstring("Dispatch Class")
+        ]
+        coclass Dispatch
+        {
+                [default] interface IDispatch;
+        };
+};

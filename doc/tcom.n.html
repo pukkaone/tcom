@@ -1,0 +1,598 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>tcom</title>
+<style type="text/css">
+	  .command
+	  { font-style: normal; font-weight: bold; }
+	  .option
+	  { font-style: normal; font-weight: bold; }
+	  .parameter
+	  { font-style: italic; font-weight: normal; }
+	</style>
+</head>
+<body>
+<h2>Name</h2>
+<p>tcom -- Access COM objects from Tcl</p>
+ 
+ 
+ 
+ <h2>Synopsis</h2>
+  
+   <span class="command">package require tcom</span>
+   <var>?<span class="option">3.9</span>?</var>
+   <br>
+   <span class="command">::tcom::ref</span>
+   <span class="command">createobject</span>
+   <var>?<span class="option">-inproc</span>?</var>
+   <var>?<span class="option">-local</span>?</var>
+   <var>?<span class="option">-remote</span>?</var>
+   <var>?<span class="option">-clsid</span>?</var>
+   <var>progID</var>
+   <var>?hostName?</var>
+   <br>
+   <span class="command">::tcom::ref</span>
+   <span class="command">getactiveobject</span>
+   <var>?<span class="option">-clsid</span>?</var>
+   <var>progID</var>
+   <br>
+   <span class="command">::tcom::ref</span>
+   <span class="command">getobject</span>
+   <var>pathName</var>
+   <br>
+   <span class="command">::tcom::ref</span>
+   <span class="command">equal</span>
+   <var>handle1</var>
+   <var>handle2</var>
+   <br>
+   <var>handle</var>
+   <var>?<span class="option">-method</span>?</var>
+   <var>method</var>
+   <var>?argument ...?</var>
+   <br>
+   <var>handle</var>
+   <var><span class="option">-namedarg</span></var>
+   <var>method</var>
+   <var>?argumentName argumentValue ...?</var>
+   <br>
+   <var>handle</var>
+   <var>?<span class="option">-get</span>?</var>
+   <var>?<span class="option">-set</span>?</var>
+   <var>property</var>
+   <var>?index ...?</var>
+   <var>?value?</var>
+   <br>
+   <span class="command">::tcom::foreach</span>
+   <var>varname</var>
+   <var>collectionHandle</var>
+   <var>body</var>
+   <br>
+   <span class="command">::tcom::foreach</span>
+   <var>varlist</var>
+   <var>collectionHandle</var>
+   <var>body</var>
+   <br>
+   <span class="command">::tcom::bind</span>
+   <var>handle</var>
+   <var>command</var>
+   <var>?eventIID?</var>
+   <br>
+   <span class="command">::tcom::unbind</span>
+   <var>handle</var>
+   <br>
+   <span class="command">::tcom::na</span>
+   <br>
+   <span class="command">::tcom::info interface</span>
+   <var>handle</var>
+   <br>
+   <span class="command">::tcom::configure</span>
+   <var>name</var>
+   <var>?value?</var>
+   <br>
+   <span class="command">::tcom::import</span>
+   <var>typeLibrary</var>
+   <var>?namespace?</var>
+   <br>
+  
+ 
+ 
+  <h2>Description</h2>
+  <p>The <span class="command">tcom</span> package provides commands to access COM
+  objects through IDispatch and IUnknown derived interfaces.</p>
+ 
+ 
+  <h2>Commands</h2>
+  <dl>
+   
+    <dt>
+     
+      <span class="command">::tcom::ref</span>
+      <span class="command">createobject</span>
+      <var>?<span class="option">-inproc</span>?</var>
+      <var>?<span class="option">-local</span>?</var>
+      <var>?<span class="option">-remote</span>?</var>
+      <var>?<span class="option">-clsid</span>?</var>
+      <var>progID</var>
+      <var>?hostName?</var>
+      <br>
+      <span class="command">::tcom::ref</span>
+      <span class="command">getactiveobject</span>
+      <var>?<span class="option">-clsid</span>?</var>
+      <var>progID</var>
+     
+    </dt>
+    <dd>
+     <p>These commands return a handle representing a reference to a COM
+     object through an interface pointer.  The handle can be used as a Tcl
+     command to invoke operations on the object.  In practice, you should store
+     the handle in a Tcl variable or pass it as an argument to another command.
+     </p>
+     <p>References to COM objects are automatically released.  If you store
+     the handle in a local variable, the reference is released when execution
+     leaves the variable's scope.  If you store the handle in a global
+     variable, you can release the reference by unsetting the variable, setting
+     the variable to another value, or exiting the Tcl interpreter.</p>
+     <p>The <span class="command">createobject</span> subcommand creates an instance
+     of the object.  The <span class="option">-inproc</span> option requests the object be
+     created in the same process.  The <span class="option">-local</span> option requests
+     the object be created in another process on the local machine.  The
+     <span class="option">-remote</span> option requests the object be created on a remote
+     machine.  The <var>progID</var> parameter is the programmatic
+     identifier of the object class.  Use the <span class="option">-clsid</span> option if
+     you want to specify the class using a class ID instead.  The
+     <var>hostName</var> parameter specifies the machine where you
+     want to create the object instance.</p>
+     <p>The <span class="command">getactiveobject</span> subcommand gets a reference
+     to an already existing object.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <span class="command">::tcom::ref</span>
+      <span class="command">getobject</span>
+      <var>pathName</var>
+     
+    </dt>
+    <dd>
+     <p>This command returns a reference to a COM object from a file.  The
+     <var>pathName</var> parameter is the full path and name of the
+     file containing the object.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <span class="command">::tcom::ref</span>
+      <span class="command">equal</span>
+      <var>handle1</var>
+      <var>handle2</var>
+     
+    </dt>
+    <dd>
+     <p>This command compares the interface pointers represented by two
+     handles for COM identity, returning 1 if the interface pointers refer to
+     the same COM object, or 0 if not.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <var>handle</var>
+      <var>?<span class="option">-method</span>?</var>
+      <var>method</var>
+      <var>?argument ...?</var>
+     
+    </dt>
+    <dd>
+     <p>This command invokes a method on the object represented by the
+     <var>handle</var>.  The return value of the method is returned
+     as a Tcl value.  A Tcl error will be raised if the method returns a
+     failure HRESULT code.  Parameters with the [in] attribute are passed by
+     value.  For each parameter with the [out] or [in, out] attributes, pass
+     the name of a Tcl variable as the argument.  After the method returns, the
+     variables will contain the output values.  In some cases where
+     <span class="command">tcom</span> cannot get information about the object's
+     interface, you may have to use the <span class="option">-method</span> option to
+     specify you want to invoke a method.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <var>handle</var>
+      <var><span class="option">-namedarg</span></var>
+      <var>method</var>
+      <var>?argumentName argumentValue ...?</var>
+     
+    </dt>
+    <dd>
+     <p>Use the <span class="option">-namedarg</span> option to invoke a method
+     with named arguments.  This only works with objects that implement
+     IDispatch.  You specify arguments by passing name and value pairs.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <var>handle</var>
+      <var>?<span class="option">-get</span>?</var>
+      <var>?<span class="option">-set</span>?</var>
+      <var>property</var>
+      <var>?index ...?</var>
+      <var>?value?</var>
+     
+    </dt>
+    <dd>
+     <p>This command gets or sets a property of the object represented by
+     the <var>handle</var>.  If you supply a
+     <var>value</var> argument, this command sets the named
+     property to the value, otherwise it returns the property value.  For
+     indexed properties, you must specify one or more
+     <var>index</var> values.  The command raises a Tcl error if
+     you specify an invalid property name or if you try to set a value that
+     cannot be converted to the property's type.  In some cases where
+     <span class="command">tcom</span> cannot get information about the object's
+     interface, you may have to use the <span class="option">-get</span> or
+     <span class="option">-set</span> option to specify you want to get or set a property
+     respectively.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <span class="command">::tcom::foreach</span>
+      <var>varname</var>
+      <var>collectionHandle</var>
+      <var>body</var>
+      <br>
+      <span class="command">::tcom::foreach</span>
+      <var>varlist</var>
+      <var>collectionHandle</var>
+      <var>body</var>
+     
+    </dt>
+    <dd>
+     <p>This command implements a loop where the loop variable(s) take on
+     values from a collection object represented by
+     <var>collectionHandle</var>.  In the simplest case, there
+     is one loop variable, <var>varname</var>.  The
+     <var>body</var> argument is a Tcl script.  For each
+     element of the collection, the command assigns the contents of the element
+     to <var>varname</var>, then calls the Tcl interpreter to
+     execute <var>body</var>.</p>
+     <p>In the general case, there can be more than one loop variable.
+     During each iteration of the loop, the variables of
+     <var>varlist</var> are assigned consecutive elements from
+     the collection.  Each element is used exactly once.  The total number of
+     loop iterations is large enough to use up all the elements from the
+     collection.  On the last iteration, if the collection does not contain
+     enough elements for each of the loop variables, empty values are used for
+     the missing elements.</p>
+     <p>The <span class="command">break</span> and <span class="command">continue</span>
+     statements may be invoked inside <var>body</var>, with the
+     same effect as in the <span class="command">for</span> command.  The
+     <span class="command">::tcom::foreach</span> command returns an empty string.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <span class="command">::tcom::bind</span>
+      <var>handle</var>
+      <var>command</var>
+      <var>?eventIID?</var>
+     
+    </dt>
+    <dd>
+     <p>This command specifies a Tcl command that will be executed when
+     events are received from an object.  The <var>command</var>
+     will be called with additional arguments: the event name and the event
+     arguments.  By default, the event interface is the default event source
+     interface of the object's class.  Use the <var>eventIID</var>
+     parameter to specify the IID of another event interface.  If an error
+     occurs while executing the command then the bgerror mechanism is used to
+     report the error.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <span class="command">::tcom::unbind</span>
+      <var>handle</var>
+     
+    </dt>
+    <dd>
+     <p>This command tears down all event connections to the object that
+     were set up by the <span class="command">::tcom::bind</span> command.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <span class="command">::tcom::na</span>
+     
+    </dt>
+    <dd>
+     <p>Objects that implement the IDispatch interface allow some method
+     parameters to be optional.  This command returns a token representing a
+     missing optional argument.  In practice, you would pass this token as a
+     method argument in place of a missing optional argument.</p>
+    </dd>
+   
+   
+    <dt>
+     
+      <span class="command">::tcom::info interface</span>
+      <var>handle</var>
+     
+    </dt>
+    <dd>
+     <p>This command returns a handle representing a description of the
+     interface exposed by the object.  The handle supports the following
+     commands.</p>
+     <dl>
+      
+       <dt>
+        
+         <var>interfaceHandle</var>
+	 <span class="command">iid</span>
+        
+       </dt>
+       <dd>
+        <p>This command returns an interface identifier code.</p>
+       </dd>
+      
+      
+       <dt>
+        
+         <var>interfaceHandle</var>
+	 <span class="command">methods</span>
+        
+       </dt>
+       <dd>
+	<p>This command returns a list of method descriptions for methods
+	defined in the interface.  Each method description is a list.  The
+	first element is the member ID.  The second element is the return type.
+	The third element is the method name.  The fourth element is a list of
+	parameter descriptions.</p>
+       </dd>
+      
+      
+       <dt>
+        
+         <var>interfaceHandle</var>
+	 <span class="command">name</span>
+        
+       </dt>
+       <dd>
+        <p>This command returns the interface's name.</p>
+       </dd>
+      
+      
+       <dt>
+        
+         <var>interfaceHandle</var>
+	 <span class="command">properties</span>
+        
+       </dt>
+       <dd>
+	<p>This command returns a list of property descriptions for
+	properties defined in the interface.  Each property description is a
+	list.  The first element is the member ID.  The second element is the
+	property read/write mode.  The third element is the property data type.
+	The fourth element is the property name.  If the property is an indexed
+	property, there is a fifth element which is a list of parameter
+	descriptions.</p>
+       </dd>
+      
+     </dl>
+    </dd>
+   
+   
+    <dt>
+     
+      <span class="command">::tcom::configure</span>
+      <var>name</var>
+      <var>?value?</var>
+     
+    </dt>
+    <dd>
+     <p>This command sets and retrieves options for the package.  If
+     <var>name</var> is supplied but no
+     <var>value</var> then the command returns the current
+     value of the given option.  If one or more pairs of
+     <var>name</var> and <var>value</var> are
+     supplied, the command sets each of the named options to the corresponding
+     value; in this case the return value is an empty string.</p>
+     <dl>
+      
+       <dt>
+        
+         <var><span class="option">-concurrency</span></var>
+	 <var>?concurrencyModel?</var>
+        
+       </dt>
+       <dd>
+	<p>This option sets the concurrency model, which can be
+	<span class="option">apartmentthreaded</span> or <span class="option">multithreaded</span>.
+	The default is <span class="option">apartmentthreaded</span>.  You must configure
+	this option before performing any COM operations such as getting a
+	reference to an object.  After a COM operation has been done, changing
+	this option has no effect.</p>
+       </dd>
+      
+     </dl>
+    </dd>
+   
+  </dl>
+ 
+ 
+  <h2>Importing Type Library Information</h2>
+  
+   <span class="command">::tcom::import</span>
+   <var>typeLibrary</var>
+   <var>?namespace?</var>
+  
+  <p>Use the <span class="command">::tcom::import</span> command to convert type
+  information from a type library into Tcl commands to access COM classes and
+  interfaces.  The <var>typeLibrary</var> argument specifies a
+  type library file.  By default, the commands are defined in a namespace named
+  after the type library, but you may specify another namespace by supplying a
+  <var>namespace</var> argument.  This command returns the
+  library name stored in the type library file.</p>
+  
+   <h3>Commands</h3>
+   <dl>
+    
+     <dt>
+      
+       <var>class</var>
+       <var>?<span class="option">-inproc</span>?</var>
+       <var>?<span class="option">-local</span>?</var>
+       <var>?<span class="option">-remote</span>?</var>
+       <var>?hostName?</var>
+      
+     </dt>
+     <dd>
+      <p>For each class in the type library,
+      <span class="command">::tcom::import</span> defines a Tcl command with the same
+      name as the class.  The class command creates an object of the class and
+      returns a handle representing an interface pointer to the object.  The
+      command accepts an optional <var>hostName</var> argument
+      to specify the machine where you want to create the object.  You can use
+      the returned handle to invoke methods and access properties of the
+      object.  In practice, you should store this handle in a Tcl variable or
+      pass it as an argument to a Tcl command.</p>
+     </dd>
+    
+    
+     <dt>
+      
+       <var>interface</var>
+       <var>handle</var>
+      
+     </dt>
+     <dd>
+      <p>For each interface in the type library,
+      <span class="command">::tcom::import</span> defines a Tcl command with the same
+      name as the interface.  The interface command queries the object
+      represented by <var>handle</var> for an interface pointer
+      to that specific interface.  The command returns a handle representing
+      the interface pointer.  You can use the returned handle to invoke methods
+      and access properties of the object.  In practice, you should store this
+      handle in a Tcl variable or pass it as an argument to a Tcl
+      command.</p>
+     </dd>
+    
+   </dl>
+  
+  
+   <h3>Enumerations</h3>
+   <p>The <span class="command">::tcom::import</span> command generates a Tcl array
+   for each enumeration defined in the type library.  The array name is the
+   enumeration name.  To get an enumerator value, use an enumerator name as an
+   index into the array.</p>
+  
+ 
+ 
+  <h2>Tcl Value to VARIANT Mapping</h2>
+  <p>Each Tcl value has two representations.  A Tcl value has a string
+  representation and also has an internal representation that can be
+  manipulated more efficiently.  For example, a Tcl list is represented as an
+  object that holds the list's string representation as well as an array of
+  pointers to the objects for each list element.  The two representations are a
+  cache of each other and are computed lazily.  That is, each representation is
+  only computed when necessary, is computed from the other representation, and,
+  once computed, is saved.  In addition, a change in one representation
+  invalidates the other one.  As an example, a Tcl program doing integer
+  calculations can operate directly on a variable's internal machine integer
+  representation without having to constantly convert between integers and
+  strings.  Only when it needs a string representing the variable's value, say
+  to print it, will the program regenerate the string representation from the
+  integer.  The internal representations built into Tcl include boolean,
+  integer and floating point types.</p>
+  <p>When invoking COM object methods, <span class="command">tcom</span> tries to
+  convert each Tcl argument to the parameter type specified by the method
+  interface.  For example, if a method accepts an <tt>int</tt>
+  parameter, <span class="command">tcom</span> tries to convert the argument to that
+  type.  If the parameter type is a VARIANT, the conversion has an extra
+  complication because a VARIANT is designed to hold many different data types.
+  One approach might be to simply copy the Tcl value's string representation
+  to a string in the VARIANT, and hope the method's implementation can correctly
+  interpret the string, but this doesn't work in general because some
+  implementations expect certain VARIANT types.</p>
+  <p><span class="command">Tcom</span> uses the Tcl value's internal representation
+  type as a hint to choose the resulting VARIANT type.</p>
+  <blockquote>
+   <b>Tcl value to VARIANT mapping</b><br>
+   <table border="1">
+    
+     <tr>
+      <td><b>Tcl internal representation</b></td>
+      <td><b>VARIANT type</b></td>
+     </tr>
+    
+    
+     <tr>
+      <td>boolean</td>
+      <td>VT_BOOL</td>
+     </tr>
+     <tr>
+      <td>int</td>
+      <td>VT_I4</td>
+     </tr>
+     <tr>
+      <td>double</td>
+      <td>VT_R8</td>
+     </tr>
+     <tr>
+      <td>list</td>
+      <td>one-dimensional array of VT_VARIANT</td>
+     </tr>
+     <tr>
+      <td>bytearray</td>
+      <td>one-dimensional array of VT_UI1</td>
+     </tr>
+     <tr>
+      <td>other</td>
+      <td>VT_BSTR</td>
+     </tr>
+    
+   </table>
+  </blockquote>
+  
+   <h3>Invoking Methods With VARIANT Parameters</h3>
+   <p>The internal representation of a Tcl value may become significant when
+   it is passed to a VARIANT parameter of a method.  For example, the standard
+   interface for COM collections defines the <span class="command">Item</span> method for
+   getting an element by specifying an index.  Many implementations of the
+   method allow the index to be an integer value (usually based from 1) or a
+   string key.  If the index parameter is a VARIANT, you must account for the
+   internal representation type of the Tcl argument passed to that
+   parameter.</p>
+   <table bgcolor="#CCCCCC" width="100%"><tr><td><pre>
+
+# Assume $collection is a handle to a collection.
+set element [$collection Item 1]
+</pre></td></tr></table>
+   <p>This command passes a string consisting of the single character "1"
+   to the Item method.  The method may return an error because it can't find an
+   element with that string key.</p>
+<table bgcolor="#CCCCCC" width="100%"><tr><td><pre>
+
+set numElements [$collection Count]
+for {set i 1} {$i &lt;= $numElements} {incr i} {  ;# 1
+    set element [$collection Item $i]  ;# 2
+}
+</pre></td></tr></table>
+   <p>In line 1, the <span class="command">for</span> command sets the internal
+   representation of <tt>$i</tt> to an int type as a side effect of
+   evaluating the condition expression <tt>{$i &lt;=
+   $numElements}</tt>.  The command in line 2 passes the integer value in
+   <tt>$i</tt> to the Item method, which should succeed if the method
+   can handle integer index values.</p>
+  
+ 
+</body>
+</html>

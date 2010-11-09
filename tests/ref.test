@@ -1,0 +1,52 @@
+# $Id: ref.test,v 1.2 2002/06/29 15:44:21 cthuang Exp $
+#
+# This file contains tests for the ::tcom::ref command.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+test createobject-1.1 {::tcom::ref createobject, Excel} {
+    package require tcom
+
+    set application [::tcom::ref createobject "Excel.Application"]
+    $application Visible 1
+
+    set workbooks [$application Workbooks]
+    set workbook [$workbooks Add]
+    set worksheets [$workbook Worksheets]
+    set worksheet [$worksheets Item [expr 1]]
+
+    set cells [$worksheet Cells]
+    set i 0
+    foreach row {1 2 3} {
+	foreach column {A B C} {
+	    $cells Item $row $column [incr i]
+	}
+    }
+
+    $workbook Saved 1
+    $application Quit
+} {}
+
+test createobject-1.2 {::tcom::ref createobject, Banking example server} {
+    package require tcom
+
+    set bank [::tcom::ref createobject "Banking.Bank"]
+    set account [$bank CreateAccount]
+    $account Deposit 30
+    $account Withdraw 20
+    $account Balance
+} {10}
+
+test getobject-1.1 {::tcom::ref getobject, ADSI} {
+    package require tcom
+
+    set computerName $env(COMPUTERNAME)
+    set object [::tcom::ref getobject "WinNT://$computerName,computer"]
+    $object Class
+} {Computer}
+
+::tcltest::cleanupTests
+return

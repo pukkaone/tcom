@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>COM Object Implementation in Tcl</title>
+<style type="text/css">
+	  .command
+	  { font-style: normal; font-weight: bold; }
+	  .option
+	  { font-style: normal; font-weight: bold; }
+	  .replaceable
+	  { font-style: italic; font-weight: normal; }
+	  .listing
+	  { font-size: 9pt; }
+	</style>
+</head>
+<body>
+<h1>COM Object Implementation in Tcl</h1>
+ 
+ 
+  <h2>Introduction</h2>
+  <p>This article shows by example how to implement COM objects in
+  Tcl with the <span class="command">tcom</span> extension.  It shows how an object
+  can be implemented by an [incr Tcl] class or in just plain Tcl.
+  </p>
+  <div>
+   
+    <img src="bankingClassDiagram.png">
+   
+  </div>
+  <p>The class diagram shows the structure of server objects which implement
+   two COM interfaces.  The IAccount interface defines a Balance property, and
+   Deposit and Withdraw methods which modify the balance.  The Account class
+   implements the IAccount interface by delegating its operations to the
+   AccountImpl class, which is written in [incr Tcl] and actually implements
+   the operations.  The IBank interface defines a method to create an account.
+   Following the same pattern, the Bank class implements the IBank interface by
+   delegating to the BankImpl class, which provides the actual implementation.
+  </p>
+ 
+ 
+  <h2>Write MIDL Specification</h2>
+  <p> The file <tt>Banking.idl</tt> contains the MIDL
+   specification for the COM interfaces and classes.  The interfaces can be
+   declared <tt>dual</tt> because <span class="command">tcom</span> can
+   implement objects whose operations are invoked through the IDispatch
+   interface or the virtual function table.</p>
+  <table bgcolor="#CCCCCC" width="100%"><tr><td><pre class="listing">
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+        [
+                object,
+                uuid(0A0059C4-E0B0-11D2-942A-00C04F7040AB),
+                dual,
+                helpstring("IAccount Interface"),
+                pointer_default(unique)
+        ]
+        interface IAccount: IDispatch
+        {
+                [id(1), propget, helpstring("property Balance")]
+                HRESULT Balance([out, retval] long *pValue);
+
+                [id(2), helpstring("method Deposit")]
+                HRESULT Deposit([in] long amount);
+
+                [id(3), helpstring("method Withdraw")]
+                HRESULT Withdraw([in] long amount);
+        };
+
+        [
+                object,
+                uuid(0A0059C4-E0B0-11D2-942A-00C04F7040AC),
+                dual,
+                helpstring("IBank Interface"),
+                pointer_default(unique)
+        ]
+        interface IBank: IDispatch
+        {
+                [id(1), helpstring("method CreateAccount")]
+                HRESULT CreateAccount([out, retval] IAccount **pAccount);
+        };
+
+[
+        uuid(0A0059B8-E0B0-11D2-942A-00C04F7040AB),
+        version(1.0),
+        helpstring("Banking 1.0 Type Library")
+]
+library Banking
+{
+        importlib("stdole32.tlb");
+
+        [
+                uuid(0A0059C5-E0B0-11D2-942A-00C04F7040AB),
+                helpstring("Account Class")
+        ]
+        coclass Account
+        {
+                [default] interface IAccount;
+        };
+
+        [
+                uuid(0A0059C5-E0B0-11D2-942A-00C04F7040AC),
+                helpstring("Bank Class")
+        ]
+        coclass Bank
+        {
+                [default] interface IBank;
+        };
+};
+</pre></td></tr></table>
+ 
+ 
+  <h2>Create Type Library</h2>
+  <p>Run this command to generate a type library file
+  <tt>Banking.tlb</tt> from the MIDL specification.</p>
+  <table bgcolor="#FFFFCC" width="100%"><tr><td><pre>
+
+<kbd>midl Banking.idl</kbd>
+</pre></td></tr></table>
+ 
+ 
+  <h2>Create Tcl Package</h2>
+  <p>The <span class="command">tcom</span> server implementation depends on the Tcl
+  package mechanism to provide the code that implements specific COM interfaces.
+  In this example, we'll create a package named Banking, which provides code
+  that implements the IBank and IAccount interfaces.</p>
+
+  <p>Create a directory for the package by making a subdirectory named
+  <tt>Banking</tt> under one of the directories in the
+  <tt>auto_path</tt> variable.  Create a
+  <tt>pkgIndex.tcl</tt> file in the package directory.</p>
+<table bgcolor="#CCCCCC" width="100%"><tr><td><pre class="listing">
+
+package ifneeded Banking 1.0 [list source [file join $dir server.itcl]]
+</pre></td></tr></table>
+
+  <p>Copy the <tt>Banking.tlb</tt> type library file into the
+  package directory.</p>
+
+  <p>Create the following <tt>server.itcl</tt> file in the package
+  directory.  This file defines [incr Tcl] classes that implement the
+  IBank and IAccount interfaces.</p>
+
+  <table bgcolor="#CCCCCC" width="100%"><tr><td><pre class="listing">
+
+package provide Banking 1.0
+
+package require Itcl
+namespace import ::itcl::*
+
+package require tcom
+::tcom::import [file join [file dirname [info script]] Banking.tlb]
+
+class AccountImpl {
+    private variable balance 0
+
+    public method _get_Balance {} {
+        return $balance
+    }
+
+    public method Deposit {amount} {
+        set balance [expr $balance + $amount]
+    }
+
+    public method Withdraw {amount} {
+        set balance [expr $balance - $amount]
+    }
+}
+
+class BankImpl {
+    public method CreateAccount {} {
+        set accountImpl [AccountImpl #auto]
+        return [::tcom::object create ::Banking::Account \
+            [code $accountImpl] {delete object}]                                ;# 1
+    }
+}
+
+::tcom::object registerfactory ::Banking::Bank {BankImpl #auto} {delete object} ;# 2
+</pre></td></tr></table>
+  
+  <p>On line 1, the <span class="command">::tcom::object create</span> command creates
+  a COM object that implements the IAccount interface by delegating its
+  operations to an [incr Tcl] object specified by an [incr Tcl] object handle.
+  Interface methods are mapped to a method with the same name.  Interface
+  properties are mapped to methods named by prepending <tt>_get_</tt>
+  and <tt>_set_</tt> to the property name.  When the last reference
+  to the COM object is released, <span class="command">tcom</span> invokes the
+  <tt>delete object</tt> command with the [incr Tcl] object handle as
+  an additional argument to clean up the [incr Tcl] object.</p>
+  
+  <p>Line 2 creates a factory for creating instances of the Bank class and
+   registers the factory with COM.  To create a COM object, the factory invokes
+   a command which returns a handle to an [incr Tcl] object that implements the
+   operations.  In this example, the factory invokes the <tt>BankImpl
+   #auto</tt> command which creates a BankImpl [incr Tcl] object and
+   returns a handle to that object.  To clean up when the COM object is
+   destroyed, <span class="command">tcom</span> invokes the <tt>delete
+   object</tt> command with the [incr Tcl] object handle as an additional
+   argument.</p>
+ 
+ 
+  <h2>Register Server</h2>
+  <p>Run these Tcl commands to create entries in the Windows registry
+  required by COM and the <span class="command">tcom</span> server implementation.
+  </p>
+  <table bgcolor="#FFFFCC" width="100%"><tr><td><pre>
+
+<kbd>package require tcom</kbd>
+<kbd>::tcom::server register Banking.tlb</kbd>
+</pre></td></tr></table>
+ 
+ 
+  <h2>Implement Client</h2>
+  <p>The <tt>client.tcl</tt> script implements a simple client.
+  It gets a reference to an object that implements the bank interface, creates
+  an account, and performs some operations on the account.</p>
+  <table bgcolor="#CCCCCC" width="100%"><tr><td><pre class="listing">
+
+package require tcom
+
+set bank [::tcom::ref createobject "Banking.Bank"]
+set account [$bank CreateAccount]
+puts [$account Balance]
+$account Deposit 20
+puts [$account Balance]
+$account Withdraw 10
+puts [$account Balance]
+</pre></td></tr></table>
+ 
+ 
+  <h2>Implement Objects In Plain Tcl</h2>
+   <p>You can implement objects in plain Tcl.  The servant command passed to
+    the <span class="command">::tcom::object create</span> command can be the name of any
+    object-style command.  Similarly, the factory command passed to the
+    <span class="command">::tcom::object registerfactory</span> command can return the
+    name of any object-style command.  The following Tcl script defines the
+    procedures <tt>accountImpl</tt> and <tt>bankImpl</tt>,
+    which have parameters in the style of a method name followed by any
+    arguments.</p>
+   <table bgcolor="#CCCCCC" width="100%"><tr><td><pre class="listing">
+
+package provide Banking 1.0
+
+package require tcom
+::tcom::import [file join [file dirname [info script]] Banking.tlb]
+
+proc accountImpl {method args} {
+    global balance
+
+    switch -- $method {
+        _get_Balance {
+            return $balance
+        }
+
+        Deposit {
+            set amount [lindex $args 0]
+            set balance [expr $balance + $amount]
+        }
+
+        Withdraw {
+            set amount [lindex $args 0]
+            set balance [expr $balance - $amount]
+        }
+        
+        default {
+            error "unknown method $method $args"
+        }
+    }
+}
+
+proc bankImpl {method args} {
+    global balance
+
+    switch -- $method {
+        CreateAccount {
+            set balance 0
+            return [::tcom::object create ::Banking::Account accountImpl]
+        }
+        
+        default {
+            error "unknown method $method $args"
+        }
+    }
+}
+
+::tcom::object registerfactory ::Banking::Bank {list bankImpl}
+</pre></td></tr></table>
+ 
+</body>
+</html>
