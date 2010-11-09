@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: article2html.xsl,v 1.11 2002/06/29 15:34:52 cthuang Exp $ -->
+<!-- $Id: article2html.xsl 7 2005-02-24 05:18:47Z cthuang $ -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="html" encoding="UTF-8"
    doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -8,33 +8,35 @@
   <xsl:template match="article">
     <html>
       <head>
-        <title><xsl:value-of select="artheader/title"/></title>
+        <title><xsl:value-of select="title"/></title>
 	<style type="text/css">
 	  .command
 	  { font-style: normal; font-weight: bold; }
 	  .option
 	  { font-style: normal; font-weight: bold; }
-	  .replaceable
-	  { font-style: italic; font-weight: normal; }
-	  .listing
-	  { font-size: 9pt; }
+	  .programlisting
+	  { background-color: #E8E8E8; font-size: 9pt; }
+	  .screen
+	  { background-color: #FFFFCC; }
 	</style>
       </head>
       <body>
-        <h1><xsl:value-of select="artheader/title"/></h1>
 	<xsl:apply-templates/>
       </body>
     </html>
   </xsl:template>
 
-  <xsl:template match="artheader"/>
+  <xsl:template match="article/title">
+    <h1><xsl:value-of select="text()"/></h1>
+  </xsl:template>
+
+  <xsl:template match="articleinfo"/>
 
   <xsl:template match="cmdsynopsis">
     <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="arg">
-    <var>
     <xsl:choose>
       <xsl:when test="@choice='plain'"></xsl:when>
       <xsl:otherwise>?</xsl:otherwise>
@@ -47,7 +49,6 @@
       <xsl:when test="@choice='plain'"></xsl:when>
       <xsl:otherwise>?</xsl:otherwise>
     </xsl:choose>
-    </var>
   </xsl:template>
 
   <xsl:template match="option">
@@ -101,15 +102,15 @@
   </xsl:template>
 
   <xsl:template match="programlisting">
-    <table bgcolor="#CCCCCC" width="100%"><tr><td><pre class="listing">
+    <pre class="programlisting">
     <xsl:apply-templates/>
-    </pre></td></tr></table>
+    </pre>
   </xsl:template>
 
   <xsl:template match="screen">
-    <table bgcolor="#FFFFCC" width="100%"><tr><td><pre>
+    <pre class="screen">
     <xsl:apply-templates/>
-    </pre></td></tr></table>
+    </pre>
   </xsl:template>
 
   <xsl:template match="userinput">

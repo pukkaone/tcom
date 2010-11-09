@@ -1,4 +1,4 @@
-# $Id: ref.test,v 1.2 2002/06/29 15:44:21 cthuang Exp $
+# $Id: ref.test 13 2005-04-18 12:24:14Z cthuang $
 #
 # This file contains tests for the ::tcom::ref command.
 
@@ -34,7 +34,9 @@ test createobject-1.2 {::tcom::ref createobject, Banking example server} {
     package require tcom
 
     set bank [::tcom::ref createobject "Banking.Bank"]
+#    set bank [::tcom::ref querydispatch $bank]
     set account [$bank CreateAccount]
+#    set account [::tcom::ref querydispatch $account]
     $account Deposit 30
     $account Withdraw 20
     $account Balance

@@ -1,4 +1,4 @@
-# $Id: server.itcl,v 1.7 2002/06/29 15:34:52 cthuang Exp $
+# $Id: server.itcl 5 2005-02-16 14:57:24Z cthuang $
 package provide Banking 1.0
 
 package require Itcl

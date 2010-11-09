@@ -1,3 +1,17 @@
+Version 3.10
+- Workaround type mismatch error when passing VT_UINT | VT_BYREF parameters.
+- Added support for 64-bit integer arguments.
+- On type mismatch errors, the error result now indicates which argument cannot
+  be converted.
+- Added missing conversions from VT_DISPATCH | VT_BYREF, VT_UNKNOWN | VT_BYREF,
+  VT_VARIANT | VT_BYREF, and VT_ARRAY | VT_BYREF arguments.
+- Load type library using neutral language argument.
+- Replace -method option with -call option.
+- Fixed invalid pointer error when returned EXCEPINFO contains null
+  description.
+- Fixed passing SAFEARRAY(short) parameters.
+- Fixed passing input parameters by reference.
+
 Version 3.9
 - Fixed defect where eval may trigger premature destruction of handle internal
   representation.

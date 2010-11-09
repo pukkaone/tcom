@@ -1,4 +1,4 @@
-# $Id: register.tcl,v 1.3 2002/03/20 23:52:35 cthuang Exp $
+# $Id: register.tcl 5 2005-02-16 14:57:24Z cthuang $
 #
 # This script registers the Tcl Active Scripting engine.
 

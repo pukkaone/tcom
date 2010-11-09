@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: refentry2html.xsl,v 1.16 2002/06/29 15:34:52 cthuang Exp $ -->
+<!-- $Id: refentry2html.xsl 7 2005-02-24 05:18:47Z cthuang $ -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="html" encoding="UTF-8"
    doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -10,12 +10,18 @@
       <head>
         <title><xsl:value-of select="refnamediv/refname"/></title>
 	<style type="text/css">
+	  table
+	  { margin-left: 2em; border-collapse: collapse; }
+	  th
+	  { color: white; background-color: navy; }
+	  .cell
+	  { border: 2px solid navy; padding: 1px 4px 1px 4px; }
 	  .command
 	  { font-style: normal; font-weight: bold; }
 	  .option
 	  { font-style: normal; font-weight: bold; }
-	  .parameter
-	  { font-style: italic; font-weight: normal; }
+	  .programlisting
+	  { background-color: #E8E8E8; }
 	</style>
       </head>
       <body>
@@ -26,7 +32,7 @@
     </html>
   </xsl:template>
 
-  <xsl:template match="docinfo"/>
+  <xsl:template match="refentryinfo"/>
 
   <xsl:template match="refmeta"/>
 
@@ -42,7 +48,6 @@
   </xsl:template>
 
   <xsl:template match="arg">
-    <var>
     <xsl:choose>
       <xsl:when test="@choice='plain'"></xsl:when>
       <xsl:otherwise>?</xsl:otherwise>
@@ -55,7 +60,10 @@
       <xsl:when test="@choice='plain'"></xsl:when>
       <xsl:otherwise>?</xsl:otherwise>
     </xsl:choose>
-    </var>
+  </xsl:template>
+
+  <xsl:template match="replaceable">
+    <var><xsl:apply-templates/></var>
   </xsl:template>
 
   <xsl:template match="option">
@@ -117,19 +125,17 @@
   </xsl:template>
 
   <xsl:template match="table">
-    <blockquote>
-    <xsl:apply-templates/>
-    </blockquote>
+    <table class="cell">
+      <xsl:apply-templates/>
+    </table>
   </xsl:template>
 
   <xsl:template match="table/title">
-    <b><xsl:value-of select="."/></b><br/>
+    <caption><xsl:value-of select="."/></caption>
   </xsl:template>
 
   <xsl:template match="table/tgroup">
-    <table border="1">
     <xsl:apply-templates/>
-    </table>
   </xsl:template>
 
   <xsl:template match="thead">
@@ -145,17 +151,17 @@
   </xsl:template>
 
   <xsl:template match="thead/row/entry">
-    <td><b><xsl:value-of select="."/></b></td>
+    <th class="cell"><xsl:value-of select="."/></th>
   </xsl:template>
 
   <xsl:template match="tbody/row/entry">
-    <td><xsl:value-of select="."/></td>
+    <td class="cell"><xsl:value-of select="."/></td>
   </xsl:template>
 
   <xsl:template match="programlisting">
-    <table bgcolor="#CCCCCC" width="100%"><tr><td><pre>
+    <pre class="programlisting">
     <xsl:apply-templates/>
-    </pre></td></tr></table>
+    </pre>
   </xsl:template>
 
   <xsl:template match="*">

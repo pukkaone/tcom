@@ -1,6 +1,6 @@
-# $Id: array.test,v 1.1 2003/05/12 23:31:03 cthuang Exp $
+# $Id: array.test 5 2005-02-16 14:57:24Z cthuang $
 #
-# This file contains tests for the passing arrays
+# This file contains tests for passing arrays.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
     package require tcltest

@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
-<!-- $Id: server.xml,v 1.23 2002/06/29 15:34:52 cthuang Exp $ -->
-<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "docbookx.dtd">
+<!-- $Id: server.xml 12 2005-04-14 14:01:20Z cthuang $ -->
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+ "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
 <article>
- <artheader>
-  <date>$Date: 2002/06/29 15:34:52 $</date>
-  <releaseinfo>$Revision: 1.23 $</releaseinfo>
-  <title>COM Object Implementation in Tcl</title>
- </artheader>
+ <title>COM Object Implementation in Tcl</title>
+ <articleinfo>
+  <date>$Date: 2005-04-14 10:01:20 -0400 (Thu, 14 Apr 2005) $</date>
+  <releaseinfo>$Revision: 12 $</releaseinfo>
+ </articleinfo>
  <sect1>
   <title>Introduction</title>
   <para>This article shows by example how to implement COM objects in
@@ -36,7 +37,6 @@
    implement objects whose operations are invoked through the IDispatch
    interface or the virtual function table.</para>
   <programlisting>
-
 import "oaidl.idl";
 import "ocidl.idl";
 
@@ -106,7 +106,6 @@ library Banking
   <para>Run this command to generate a type library file
   <literal>Banking.tlb</literal> from the MIDL specification.</para>
   <screen>
-
 <userinput>midl Banking.idl</userinput>
 </screen>
  </sect1>
@@ -122,7 +121,6 @@ library Banking
   <literal>auto_path</literal> variable.  Create a
   <literal>pkgIndex.tcl</literal> file in the package directory.</para>
 <programlisting>
-
 package ifneeded Banking 1.0 [list source [file join $dir server.itcl]]
 </programlisting>
 
@@ -134,7 +132,6 @@ package ifneeded Banking 1.0 [list source [file join $dir server.itcl]]
   IBank and IAccount interfaces.</para>
 
   <programlisting>
-
 package provide Banking 1.0
 
 package require Itcl
@@ -196,7 +193,6 @@ class BankImpl {
   required by COM and the <command>tcom</command> server implementation.
   </para>
   <screen>
-
 <userinput>package require tcom</userinput>
 <userinput>::tcom::server register Banking.tlb</userinput>
 </screen>
@@ -207,7 +203,6 @@ class BankImpl {
   It gets a reference to an object that implements the bank interface, creates
   an account, and performs some operations on the account.</para>
   <programlisting>
-
 package require tcom
 
 set bank [::tcom::ref createobject "Banking.Bank"]
@@ -230,7 +225,6 @@ puts [$account Balance]
     which have parameters in the style of a method name followed by any
     arguments.</para>
    <programlisting>
-
 package provide Banking 1.0
 
 package require tcom

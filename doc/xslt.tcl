@@ -1,4 +1,4 @@
-# $Id: xslt.tcl,v 1.2 2002/09/05 22:10:25 cthuang Exp $
+# $Id: xslt.tcl 7 2005-02-24 05:18:47Z cthuang $
 #
 # Run an XML document through an XSLT processor.
 
@@ -12,6 +12,7 @@ package require tcom
 set domProgId "Msxml2.DOMDocument"
 
 set source [::tcom::ref createobject $domProgId]
+$source async 0
 $source preserveWhiteSpace 1
 $source validateOnParse 0
 $source resolveExternals 0
@@ -26,6 +27,7 @@ if {![$source load $sourceUrl]} {
 }
 
 set xslt [::tcom::ref createobject $domProgId]
+$xslt async 0
 $xslt preserveWhiteSpace 1
 $xslt validateOnParse 0
 set xsltUrl [lindex $argv 1]
@@ -39,7 +41,7 @@ if {![$xslt load $xsltUrl]} {
 }
 
 regsub {<META http-equiv="Content-Type"[^>]*>} [$source transformNode $xslt] \
-    {<META http-equiv="Content-Type" content="text/html; charset=UTF-8">} \
+    {<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">} \
     resultHtml
 
 set out [open [lindex $argv 2] "w"]

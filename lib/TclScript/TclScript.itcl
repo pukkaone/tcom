@@ -1,4 +1,4 @@
-# $Id: TclScript.itcl,v 1.6 2003/11/08 17:38:09 cthuang Exp $
+# $Id: TclScript.itcl 5 2005-02-16 14:57:24Z cthuang $
 
 package require Itcl
 namespace import itcl::*

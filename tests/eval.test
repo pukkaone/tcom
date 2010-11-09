@@ -1,6 +1,6 @@
-# $Id: eval.test,v 1.2 2003/04/02 22:57:35 cthuang Exp $
+# $Id: eval.test 5 2005-02-16 14:57:24Z cthuang $
 #
-# This file contains tests the robustness of handles under eval.
+# This file tests the robustness of handles under eval.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
     package require tcltest

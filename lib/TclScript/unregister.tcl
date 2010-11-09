@@ -1,4 +1,4 @@
-# $Id: unregister.tcl,v 1.1 2003/03/20 00:12:14 cthuang Exp $
+# $Id: unregister.tcl 5 2005-02-16 14:57:24Z cthuang $
 #
 # This script unregisters the Tcl Active Scripting engine.
 

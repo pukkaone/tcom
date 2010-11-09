@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
-<!-- $Id: tcom.n.xml,v 1.65 2002/10/22 22:07:55 cthuang Exp $ -->
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "docbookx.dtd">
+<!-- $Id: tcom.n.xml 12 2005-04-14 14:01:20Z cthuang $ -->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+ "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
 <refentry id="tcom">
- <docinfo>
-  <date>$Date: 2002/10/22 22:07:55 $</date>
-  <releaseinfo>$Revision: 1.65 $</releaseinfo>
- </docinfo>
+ <refentryinfo>
+  <date>$Date: 2005-04-14 10:01:20 -0400 (Thu, 14 Apr 2005) $</date>
+  <releaseinfo>$Revision: 12 $</releaseinfo>
+ </refentryinfo>
  <refmeta>
   <refentrytitle>tcom</refentrytitle>
   <manvolnum>n</manvolnum>
@@ -17,78 +18,74 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>package require tcom</command>
-   <arg><option>3.9</option></arg>
+   <arg>3.10</arg>
    <sbr/>
-   <command>::tcom::ref</command>
-   <command>createobject</command>
-   <arg><option>-inproc</option></arg>
-   <arg><option>-local</option></arg>
-   <arg><option>-remote</option></arg>
-   <arg><option>-clsid</option></arg>
-   <arg choice="plain">progID</arg>
-   <arg>hostName</arg>
+   <command>::tcom::ref createobject</command>
+   <arg>-inproc</arg>
+   <arg>-local</arg>
+   <arg>-remote</arg>
+   <arg>-clsid</arg>
+   <arg choice="plain"><replaceable>progID</replaceable></arg>
+   <arg><replaceable>hostName</replaceable></arg>
    <sbr/>
-   <command>::tcom::ref</command>
-   <command>getactiveobject</command>
-   <arg><option>-clsid</option></arg>
-   <arg choice="plain">progID</arg>
+   <command>::tcom::ref getactiveobject</command>
+   <arg>-clsid</arg>
+   <arg choice="plain"><replaceable>progID</replaceable></arg>
    <sbr/>
-   <command>::tcom::ref</command>
-   <command>getobject</command>
-   <arg choice="plain">pathName</arg>
+   <command>::tcom::ref getobject</command>
+   <arg choice="plain"><replaceable>pathName</replaceable></arg>
    <sbr/>
-   <command>::tcom::ref</command>
-   <command>equal</command>
-   <arg choice="plain">handle1</arg>
-   <arg choice="plain">handle2</arg>
+   <command>::tcom::ref equal</command>
+   <arg choice="plain"><replaceable>handle1</replaceable></arg>
+   <arg choice="plain"><replaceable>handle2</replaceable></arg>
    <sbr/>
-   <arg choice="plain">handle</arg>
-   <arg><option>-method</option></arg>
-   <arg choice="plain">method</arg>
-   <arg rep="repeat">argument</arg>
+   <arg choice="plain"><replaceable>handle</replaceable></arg>
+   <arg>-call</arg>
+   <arg choice="plain"><replaceable>method</replaceable></arg>
+   <arg rep="repeat"><replaceable>argument</replaceable></arg>
    <sbr/>
-   <arg choice="plain">handle</arg>
-   <arg choice="plain"><option>-namedarg</option></arg>
-   <arg choice="plain">method</arg>
-   <arg rep="repeat">argumentName argumentValue</arg>
+   <arg choice="plain"><replaceable>handle</replaceable></arg>
+   <arg choice="plain">-namedarg</arg>
+   <arg choice="plain"><replaceable>method</replaceable></arg>
+   <arg rep="repeat"><replaceable>argumentName argumentValue</replaceable></arg>
    <sbr/>
-   <arg choice="plain">handle</arg>
-   <arg><option>-get</option></arg>
-   <arg><option>-set</option></arg>
-   <arg choice="plain">property</arg>
-   <arg rep="repeat">index</arg>
-   <arg>value</arg>
+   <arg choice="plain"><replaceable>handle</replaceable></arg>
+   <arg>-get</arg>
+   <arg>-set</arg>
+   <arg choice="plain"><replaceable>property</replaceable></arg>
+   <arg rep="repeat"><replaceable>index</replaceable></arg>
+   <arg><replaceable>value</replaceable></arg>
    <sbr/>
    <command>::tcom::foreach</command>
-   <arg choice="plain">varname</arg>
-   <arg choice="plain">collectionHandle</arg>
-   <arg choice="plain">body</arg>
+   <arg choice="plain"><replaceable>varname</replaceable></arg>
+   <arg choice="plain"><replaceable>collectionHandle</replaceable></arg>
+   <arg choice="plain"><replaceable>body</replaceable></arg>
    <sbr/>
    <command>::tcom::foreach</command>
-   <arg choice="plain">varlist</arg>
-   <arg choice="plain">collectionHandle</arg>
-   <arg choice="plain">body</arg>
+   <arg choice="plain"><replaceable>varlist</replaceable></arg>
+   <arg choice="plain"><replaceable>collectionHandle</replaceable></arg>
+   <arg choice="plain"><replaceable>body</replaceable></arg>
    <sbr/>
    <command>::tcom::bind</command>
-   <arg choice="plain">handle</arg>
-   <arg choice="plain">command</arg>
-   <arg>eventIID</arg>
+   <arg choice="plain"><replaceable>handle</replaceable></arg>
+   <arg choice="plain"><replaceable>command</replaceable></arg>
+   <arg><replaceable>eventIID</replaceable></arg>
    <sbr/>
    <command>::tcom::unbind</command>
-   <arg choice="plain">handle</arg>
+   <arg choice="plain"><replaceable>handle</replaceable></arg>
    <sbr/>
    <command>::tcom::na</command>
    <sbr/>
    <command>::tcom::info interface</command>
-   <arg choice="plain">handle</arg>
+   <arg choice="plain"><replaceable>handle</replaceable></arg>
    <sbr/>
    <command>::tcom::configure</command>
-   <arg choice="plain">name</arg>
-   <arg>value</arg>
+   <arg choice="plain"><replaceable>name</replaceable></arg>
+   <arg><replaceable>value</replaceable></arg>
    <sbr/>
    <command>::tcom::import</command>
-   <arg choice="plain">typeLibrary</arg>
-   <arg>namespace</arg>
+   <arg choice="plain"><replaceable>typeLibrary</replaceable></arg>
+   <arg><replaceable>namespace</replaceable></arg>
    <sbr/>
   </cmdsynopsis>
  </refsynopsisdiv>
@@ -103,19 +100,17 @@
    <varlistentry>
     <term>
      <cmdsynopsis id="ref_createobject">
-      <command>::tcom::ref</command>
-      <command>createobject</command>
-      <arg><option>-inproc</option></arg>
-      <arg><option>-local</option></arg>
-      <arg><option>-remote</option></arg>
-      <arg><option>-clsid</option></arg>
-      <arg choice="plain">progID</arg>
-      <arg>hostName</arg>
+      <command>::tcom::ref createobject</command>
+      <arg>-inproc</arg>
+      <arg>-local</arg>
+      <arg>-remote</arg>
+      <arg>-clsid</arg>
+      <arg choice="plain"><replaceable>progID</replaceable></arg>
+      <arg><replaceable>hostName</replaceable></arg>
       <sbr/>
-      <command>::tcom::ref</command>
-      <command>getactiveobject</command>
-      <arg><option>-clsid</option></arg>
-      <arg choice="plain">progID</arg>
+      <command>::tcom::ref getactiveobject</command>
+      <arg>-clsid</arg>
+      <arg choice="plain"><replaceable>progID</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -146,9 +141,8 @@
    <varlistentry>
     <term>
      <cmdsynopsis id="ref_getobject">
-      <command>::tcom::ref</command>
-      <command>getobject</command>
-      <arg choice="plain">pathName</arg>
+      <command>::tcom::ref getobject</command>
+      <arg choice="plain"><replaceable>pathName</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -160,10 +154,9 @@
    <varlistentry>
     <term>
      <cmdsynopsis id="ref_equal">
-      <command>::tcom::ref</command>
-      <command>equal</command>
-      <arg choice="plain">handle1</arg>
-      <arg choice="plain">handle2</arg>
+      <command>::tcom::ref equal</command>
+      <arg choice="plain"><replaceable>handle1</replaceable></arg>
+      <arg choice="plain"><replaceable>handle2</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -175,10 +168,10 @@
    <varlistentry>
     <term>
      <cmdsynopsis id="handle_method">
-      <arg choice="plain">handle</arg>
-      <arg><option>-method</option></arg>
-      <arg choice="plain">method</arg>
-      <arg rep="repeat">argument</arg>
+      <arg choice="plain"><replaceable>handle</replaceable></arg>
+      <arg>-call</arg>
+      <arg choice="plain"><replaceable>method</replaceable></arg>
+      <arg rep="repeat"><replaceable>argument</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -190,17 +183,19 @@
      the name of a Tcl variable as the argument.  After the method returns, the
      variables will contain the output values.  In some cases where
      <command>tcom</command> cannot get information about the object's
-     interface, you may have to use the <option>-method</option> option to
+     interface, you may have to use the <option>-call</option> option to
      specify you want to invoke a method.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>
      <cmdsynopsis id="namedarg">
-      <arg choice="plain">handle</arg>
-      <arg choice="plain"><option>-namedarg</option></arg>
-      <arg choice="plain">method</arg>
-      <arg rep="repeat">argumentName argumentValue</arg>
+      <arg choice="plain"><replaceable>handle</replaceable></arg>
+      <arg choice="plain">-namedarg</arg>
+      <arg choice="plain"><replaceable>method</replaceable></arg>
+      <arg rep="repeat">
+       <replaceable>argumentName argumentValue</replaceable>
+      </arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -212,12 +207,12 @@
    <varlistentry>
     <term>
      <cmdsynopsis id="handle_property">
-      <arg choice="plain">handle</arg>
-      <arg><option>-get</option></arg>
-      <arg><option>-set</option></arg>
-      <arg choice="plain">property</arg>
-      <arg rep="repeat">index</arg>
-      <arg>value</arg>
+      <arg choice="plain"><replaceable>handle</replaceable></arg>
+      <arg>-get</arg>
+      <arg>-set</arg>
+      <arg choice="plain"><replaceable>property</replaceable></arg>
+      <arg rep="repeat"><replaceable>index</replaceable></arg>
+      <arg><replaceable>value</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -239,14 +234,14 @@
     <term>
      <cmdsynopsis id="foreach">
       <command>::tcom::foreach</command>
-      <arg choice="plain">varname</arg>
-      <arg choice="plain">collectionHandle</arg>
-      <arg choice="plain">body</arg>
+      <arg choice="plain"><replaceable>varname</replaceable></arg>
+      <arg choice="plain"><replaceable>collectionHandle</replaceable></arg>
+      <arg choice="plain"><replaceable>body</replaceable></arg>
       <sbr/>
       <command>::tcom::foreach</command>
-      <arg choice="plain">varlist</arg>
-      <arg choice="plain">collectionHandle</arg>
-      <arg choice="plain">body</arg>
+      <arg choice="plain"><replaceable>varlist</replaceable></arg>
+      <arg choice="plain"><replaceable>collectionHandle</replaceable></arg>
+      <arg choice="plain"><replaceable>body</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -276,9 +271,9 @@
     <term>
      <cmdsynopsis id="bind">
       <command>::tcom::bind</command>
-      <arg choice="plain">handle</arg>
-      <arg choice="plain">command</arg>
-      <arg>eventIID</arg>
+      <arg choice="plain"><replaceable>handle</replaceable></arg>
+      <arg choice="plain"><replaceable>command</replaceable></arg>
+      <arg><replaceable>eventIID</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -296,7 +291,7 @@
     <term>
      <cmdsynopsis id="unbind">
       <command>::tcom::unbind</command>
-      <arg choice="plain">handle</arg>
+      <arg choice="plain"><replaceable>handle</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -321,7 +316,7 @@
     <term>
      <cmdsynopsis id="info">
       <command>::tcom::info interface</command>
-      <arg choice="plain">handle</arg>
+      <arg choice="plain"><replaceable>handle</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -332,7 +327,7 @@
       <varlistentry>
        <term>
         <cmdsynopsis id="interface_iid">
-         <arg choice="plain">interfaceHandle</arg>
+         <arg choice="plain"><replaceable>interfaceHandle</replaceable></arg>
 	 <command>iid</command>
         </cmdsynopsis>
        </term>
@@ -343,7 +338,7 @@
       <varlistentry>
        <term>
         <cmdsynopsis id="interface_methods">
-         <arg choice="plain">interfaceHandle</arg>
+         <arg choice="plain"><replaceable>interfaceHandle</replaceable></arg>
 	 <command>methods</command>
         </cmdsynopsis>
        </term>
@@ -358,7 +353,7 @@
       <varlistentry>
        <term>
         <cmdsynopsis id="interface_name">
-         <arg choice="plain">interfaceHandle</arg>
+         <arg choice="plain"><replaceable>interfaceHandle</replaceable></arg>
 	 <command>name</command>
         </cmdsynopsis>
        </term>
@@ -369,7 +364,7 @@
       <varlistentry>
        <term>
         <cmdsynopsis id="interface_properties">
-         <arg choice="plain">interfaceHandle</arg>
+         <arg choice="plain"><replaceable>interfaceHandle</replaceable></arg>
 	 <command>properties</command>
         </cmdsynopsis>
        </term>
@@ -390,8 +385,8 @@
     <term>
      <cmdsynopsis id="configure">
       <command>::tcom::configure</command>
-      <arg choice="plain">name</arg>
-      <arg>value</arg>
+      <arg choice="plain"><replaceable>name</replaceable></arg>
+      <arg><replaceable>value</replaceable></arg>
      </cmdsynopsis>
     </term>
     <listitem>
@@ -406,8 +401,8 @@
       <varlistentry>
        <term>
         <cmdsynopsis id="configure_concurrency">
-         <arg choice="plain"><option>-concurrency</option></arg>
-	 <arg>concurrencyModel</arg>
+         <arg choice="plain">-concurrency</arg>
+         <arg><replaceable>concurrencyModel</replaceable></arg>
         </cmdsynopsis>
        </term>
        <listitem>
@@ -428,8 +423,8 @@
   <title>Importing Type Library Information</title>
   <cmdsynopsis id="import">
    <command>::tcom::import</command>
-   <arg choice="plain">typeLibrary</arg>
-   <arg>namespace</arg>
+   <arg choice="plain"><replaceable>typeLibrary</replaceable></arg>
+   <arg><replaceable>namespace</replaceable></arg>
   </cmdsynopsis>
   <para>Use the <command>::tcom::import</command> command to convert type
   information from a type library into Tcl commands to access COM classes and
@@ -444,11 +439,11 @@
     <varlistentry>
      <term>
       <cmdsynopsis id="import_class">
-       <arg choice="plain">class</arg>
-       <arg><option>-inproc</option></arg>
-       <arg><option>-local</option></arg>
-       <arg><option>-remote</option></arg>
-       <arg>hostName</arg>
+       <arg choice="plain"><replaceable>class</replaceable></arg>
+       <arg>-inproc</arg>
+       <arg>-local</arg>
+       <arg>-remote</arg>
+       <arg><replaceable>hostName</replaceable></arg>
       </cmdsynopsis>
      </term>
      <listitem>
@@ -466,8 +461,8 @@
     <varlistentry>
      <term>
       <cmdsynopsis id="import_interface">
-       <arg choice="plain">interface</arg>
-       <arg choice="plain">handle</arg>
+       <arg choice="plain"><replaceable>interface</replaceable></arg>
+       <arg choice="plain"><replaceable>handle</replaceable></arg>
       </cmdsynopsis>
      </term>
      <listitem>
@@ -569,7 +564,6 @@
    internal representation type of the Tcl argument passed to that
    parameter.</para>
    <programlisting>
-
 # Assume $collection is a handle to a collection.
 set element [$collection Item 1]
 </programlisting>
@@ -577,7 +571,6 @@ set element [$collection Item 1]
    to the Item method.  The method may return an error because it can't find an
    element with that string key.</para>
 <programlisting>
-
 set numElements [$collection Count]
 for {set i 1} {$i &lt;= $numElements} {incr i} {  ;# 1
     set element [$collection Item $i]  ;# 2

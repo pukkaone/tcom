@@ -1,4 +1,4 @@
-# $Id: namedarg.test,v 1.2 2003/04/02 22:57:35 cthuang Exp $
+# $Id: namedarg.test 5 2005-02-16 14:57:24Z cthuang $
 #
 # This file contains tests invoking methods through IDispatch with named
 # arguments.
