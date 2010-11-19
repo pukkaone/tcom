@@ -21,7 +21,7 @@ set data [list \
     [list 5.2 10.0 8.0 20.0] \
 ]
 set sourceRange [$worksheet Range "A1" "D2"]
-$sourceRange Value $data
+$sourceRange Value2 $data
 
 set charts [$workbook Charts]
 set chart [$charts Add]

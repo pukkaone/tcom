@@ -47,5 +47,5 @@ foreach row {1 2 3} {
     }
 }
 
-$workbook SaveAs {c:\tst.xls}
+$workbook SaveAs {c:\tst.xlsx}
 $application Quit
