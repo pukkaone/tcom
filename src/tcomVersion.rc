@@ -1,5 +1,5 @@
 // $Id$
-#include <winres.h>
+#include <winresrc.h>
 #include "version.h"
 #include "buildNumber.h"
 

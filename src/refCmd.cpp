@@ -79,7 +79,8 @@ formatMessage (HRESULT hresult)
         
 #if TCL_MINOR_VERSION >= 2
         // Uses Unicode functions introduced in Tcl 8.2.
-        pDescription = Tcl_NewUnicodeObj(pMessage, nLen);
+        pDescription = Tcl_NewUnicodeObj(
+                reinterpret_cast<const Tcl_UniChar *>(pMessage), nLen);
 #else
         pDescription = Tcl_NewStringObj(pMessage, nLen);
 #endif
@@ -524,7 +525,8 @@ getObjectCmd (
     }
 
 #if TCL_MINOR_VERSION >= 2
-    const wchar_t *monikerName = Tcl_GetUnicode(objv[2]);
+    const wchar_t *monikerName = reinterpret_cast<const wchar_t *>(
+            Tcl_GetUnicode(objv[2]));
 #else
     _bstr_t monikerName(Tcl_GetStringFromObj(objv[2], 0));
 #endif

@@ -439,7 +439,9 @@ TclObject::TclObject (const _bstr_t &src)
     if (src.length() > 0) {
 #if TCL_MINOR_VERSION >= 2
         // Uses Unicode functions introduced in Tcl 8.2.
-        m_pObj = Tcl_NewUnicodeObj(src, -1);
+        m_pObj = Tcl_NewUnicodeObj(
+                reinterpret_cast<const Tcl_UniChar *>(static_cast<wchar_t *>(src)),
+                -1);
 #else
         m_pObj = Tcl_NewStringObj(src, -1);
 #endif
