@@ -1,7 +1,21 @@
-<?xml version="1.0"?>
-<VisualStudioPropertySheet 
-	ProjectType="Visual C++" 
-	Version="8.00" 
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
 	Name="tcom"
 	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="\tcl\include;..\build\include"
+		PreprocessorDefinitions="TCL_THREADS;USE_TCL_STUBS;USE_NON_CONST"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalLibraryDirectories="\tcl\lib"
+		IgnoreDefaultLibraryNames="msvcrt.lib"
+	/>
+	<Tool
+		Name="VCResourceCompilerTool"
+		AdditionalIncludeDirectories="..\build\include"
+	/>
 </VisualStudioPropertySheet>
